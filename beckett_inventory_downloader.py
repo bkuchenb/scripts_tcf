@@ -144,8 +144,8 @@ for row in results:
         #Create a new table to store the data.
         table_name = 'baseball_' + str(row[0])
         create = ('CREATE TABLE ' + table_name + ' LIKE template')
-#        cursor_2.execute(create)
-#        cnx_2.commit()
+        cursor_2.execute(create)
+        cnx_2.commit()
         #save all the information on each page
         for page in range(1, int(num_pages) + 1):
             #Build the xpath to the qty.
@@ -220,18 +220,20 @@ for row in results:
                                      mem_cells[x].get_attribute('value'),
                                      ser_cells[x].get_attribute('value'),
                                      cond_price[1:], condition.text)
-                print(insert)
-                #Click on the view stock photo link.
-                view_buttons[x].click()
-                #Switch to the popup.
-                
-                #Get the front and back img elements.
-                images = browser.find_elements_by_tag_name('img')
-                print(len(images))
-                for srcs in images:
-                    #Get the src attribute of the image.
-                    src = images[x].get_attribute('src')
-                    print(src)
+#*****************************************************************************#
+#                print(insert)
+#                #Click on the view stock photo link.
+#                view_buttons[x].click()
+#                #Get the div element that contains the images.
+#                div_parent = browser.find_element_by_id('cboxContent')
+#                #Print the number of divs in div_parent.
+#                children = div_parent.find_elements_by_tag_name('img')
+#                print(len(children))
+#                print(div_parent.text)
+#                #Get the front img element.
+#                images = div_image.find_elements_by_tag_name('img')
+#                print(len(images))
+#                print(images[0].get_attribute('src'))
 #                #Create a new file name for the image.
 #                file_name = sport + '_' + str(row[0]) + '_' + str(x + 1) + '_front.jpg'
 #                #Download and save the image.
@@ -245,9 +247,10 @@ for row in results:
 #                file, headers = urllib.request.urlretrieve(src, file_name_back)
 #                html = open(file)
 #                html.close()
-                #Close the popup.
+#                #Close the popup.
 #                browser.find_element_by_id('cboxClose').click()
-#                cursor_2.execute(insert)
+#*****************************************************************************#
+                cursor_2.execute(insert)
 #*****************************************************************************#
 #            print('Page', page, 'of', num_pages, 'has been downloaded for',
 #                  search_text + '.')
@@ -262,16 +265,16 @@ for row in results:
     #Commit all the inserts
     cnx_2.commit()
     #Update the details column in the tcf_overflow database.
-#    update = ('UPDATE baseball SET details = 1 WHERE id = {0}')
-#    update = update.format(row[0])
-#    cursor.execute(update)
-#    cnx.commit()
-#    #Print a message indicating which set was added.
-#    print('Set', set_number, 'of', total_sets, 'finished downloading.')
-#    print('(' + search_text + ') is up to date.')
+    update = ('UPDATE baseball SET details = 1 WHERE id = {0}')
+    update = update.format(row[0])
+    cursor.execute(update)
+    cnx.commit()
+    #Print a message indicating which set was added.
+    print('Set', set_number, 'of', total_sets, 'finished downloading.')
+    print('(' + search_text + ') is up to date.')
     set_number += 1
 #Close all databse connections and the web browser.
 cnx.close()
 cnx_2.close()
-#browser.close()
-#sys.exit()
+browser.close()
+sys.exit()
