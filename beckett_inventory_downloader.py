@@ -262,7 +262,7 @@ for row in results:
                 time.sleep(5)
     except mysql.connector.Error as err:
         print("Something went wrong: {}".format(err))
-    #Commit all the inserts
+    #Commit all the insert statements.
     cnx_2.commit()
     #Update the details column in the tcf_overflow database.
     update = ('UPDATE baseball SET details = 1 WHERE id = {0}')

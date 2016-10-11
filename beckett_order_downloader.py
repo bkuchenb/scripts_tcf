@@ -11,6 +11,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 #Import datetime to calculate different days.
 import datetime
 #Import the mysql.connector module to connect to the tcf_database.
@@ -18,35 +20,47 @@ import mysql.connector
 #Import sys and traceback for error debugging.
 import sys
 import traceback
+#Import time module to force the program to wait for web pages to load.
+import time
 #Import Beckett_Order_Downloader_Functions to process order info.
 from beckett_order_downloader_functions import format_item_description
 from beckett_order_downloader_functions import format_customer_info
 
 #Connect to tcf_beckett database.
-cnx = mysql.connector.connect(user='Mickey', password='R00thMick', 
-                              host='localhost', database='tcf_beckett')                             
+cnx = mysql.connector.connect(user='Mickey',password='R00thMick',
+                              host='localhost',database='tcf_beckett')
 #Connect to tcf_overflow database.
 overflow_cnx = mysql.connector.connect(user='Mickey', password='R00thMick', 
                               host='localhost', database='tcf_overflow')
-#Select the Firefox browser.
-browser = webdriver.Firefox()
-#Force Firefox to open in full screen mode.
-browser.maximize_window()
+##Save the TCFonlineStore host info.
+#tcf_host = 'TCFonlineStore.db.10393336.hostedresource.com'
+##Connect to TCFonlineStore database.
+#cnx = mysql.connector.connect(user = 'TCFonlineStore',
+#                              password = 'R00thM!ck', 
+#                              host = tcf_host,
+#                              database = 'TCFonlineStore')
+#Set the capabilites.
+firefox_capabilities = DesiredCapabilities.FIREFOX
+firefox_capabilities['marionette'] = True
+
+browser = webdriver.Firefox(capabilities=firefox_capabilities)
+##Select the Firefox browser.
+#browser = webdriver.Firefox()
 #Set the browser wait time to 10 seconds.
 wait = WebDriverWait(browser, 10)
 
 #Get today's date.
 today = datetime.date.today()
-#Get yesterday's date.
-end_date = today - datetime.timedelta(days = 1)
 #Get the date for 8 days ago.
 start_date = today - datetime.timedelta(days = 8)
+#Get yesterday's date.
+end_date = today - datetime.timedelta(days = 1)
 #Save the two dates as strings.
-end_date = end_date.strftime("%m/%d/%y")
 start_date = start_date.strftime("%m/%d/%y")
+end_date = end_date.strftime("%m/%d/%y")
 #Optional date range override##################################################
-#start_date = '07/28/2016'
-#end_date = '08/01/2016'
+#start_date = '09/28/2016'
+#end_date = '10/4/2016'
 #Optional date range override##################################################
 #Open the Beckett admin page.
 browser.get('http://marketplace.beckett.com/admin')
@@ -60,13 +74,17 @@ password = browser.find_element_by_id('loginPassword')
 password.send_keys('ruthmick')
 #Submit the form.
 password.submit()
-#Find the Search Orders link.
-searchOrders = browser.find_element_by_link_text('Search Orders')
-#Click the Search Orders link.
-searchOrders.click()
-
-#Force the browser to wait until the From Date box is loaded.
-wait.until(EC.presence_of_element_located((By.ID,'add_date')))
+#Wait for the page to load.
+time.sleep(10)
+##Find the Search Orders link.
+#searchOrders = browser.find_element_by_link_text('Search Orders')
+##Click the Search Orders link.
+#searchOrders.click()
+browser.get('http://marketplace.beckett.com/admin/search_orders')
+#Wait for the page to load.
+time.sleep(10)
+##Force the browser to wait until the From Date box is loaded.
+#wait.until(EC.presence_of_element_located((By.ID,'add_date')))
 #Find the From Date text box.
 fromDate = browser.find_element_by_id('add_date')
 #Enter the date for two days ago.
@@ -91,8 +109,10 @@ if pages.text != '1':
     all_options = select.find_elements_by_tag_name("option")
     #Choose to display 100 records.
     all_options[3].click()
-#Force the browser to wait until all records are displayed on one page.
-wait.until(EC.text_to_be_present_in_element((By.ID,'sp_1'), '1'))
+##Force the browser to wait until all records are displayed on one page.
+#wait.until(EC.text_to_be_present_in_element((By.ID,'sp_1'), '1'))
+#Wait for the page to load.
+time.sleep(10)
 #Find and save all order IDs.
 orderIds = browser.find_elements_by_xpath('//td[@aria-describedby=' 
                                          + '\"orders_table_order_id\"]')
