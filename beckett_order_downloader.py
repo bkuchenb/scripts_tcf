@@ -63,7 +63,7 @@ end_date = end_date.strftime("%m/%d/%y")
 #end_date = '10/4/2016'
 #Optional date range override##################################################
 #Open the Beckett admin page.
-browser.get('http://marketplace.beckett.com/admin')
+browser.get('https://www.beckett.com/login')
 #Find the loginEmail text box.
 loginEmail = browser.find_element_by_id('loginEmail')
 #Enter loginEmail.
@@ -98,8 +98,11 @@ filterBtn = browser.find_element_by_id('formfilter')
 #Click the filter button.
 filterBtn.click()
 
+#Wait for the page to load.
+time.sleep(5)
 #Find the number of pages.
 pages = browser.find_element_by_id('sp_1')
+print(pages.text)
 #Check to see if more than 1 page of records exist.
 if pages.text != '1':
     #If more than 1 page, change the number of records displayed.
@@ -109,6 +112,7 @@ if pages.text != '1':
     all_options = select.find_elements_by_tag_name("option")
     #Choose to display 100 records.
     all_options[3].click()
+    print(all_options[3].text)
 ##Force the browser to wait until all records are displayed on one page.
 #wait.until(EC.text_to_be_present_in_element((By.ID,'sp_1'), '1'))
 #Wait for the page to load.

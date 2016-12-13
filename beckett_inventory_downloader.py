@@ -15,6 +15,7 @@ import urllib
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 #Import sys, traceback and mysql.errors for error debugging.
 import sys
 import traceback
@@ -23,7 +24,9 @@ from mysql.connector.errors import Error
 import time
 #Import the mysql.connector module to connect to the tcf databases.
 import mysql.connector
-
+#Set the capabilites.
+firefox_capabilities = DesiredCapabilities.FIREFOX
+firefox_capabilities['marionette'] = True
 #Connect to tcf_overflow database.
 cnx = mysql.connector.connect(user='Mickey', password='R00thMick', 
                               host='localhost', database='tcf_overflow')
@@ -59,7 +62,7 @@ except Exception as error:
         fname,lineno,fn,text = frame
         print (("Error in {0} on line {1}").format(fname, lineno))
 #Select the Firefox browser.
-browser = webdriver.Firefox()
+browser = webdriver.Firefox(capabilities=firefox_capabilities)
 #Force Firefox to open in full screen mode.
 browser.maximize_window()
 #Set the browser wait time to 10 seconds.
