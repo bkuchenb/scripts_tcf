@@ -52,8 +52,8 @@ for order in orders_list:
     beckett_cursor.execute(query)
     details = beckett_cursor.fetchall()
     for card in details:
-        temp_str = str(card[2]) + ' ' + str(card[3]) + ' '
-        temp_str = temp_str + str(card[4])  + ' ' + str(card[5])
+        temp_str = '"' + str(card[2]) + '","' + str(card[3]) + '","'
+        temp_str = temp_str + str(card[4])  + '","' + str(card[5] + '"')
         temp_list = list()
 #        temp_list.append(card[2])
 #        temp_list.append(card[3])
