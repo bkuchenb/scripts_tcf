@@ -2549,3 +2549,8 @@ JavaScript error: chrome://browser/content/tabbrowser.xml, line 2967: TypeError:
 [Parent 2028] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
 [Parent 2028] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
 [Child 2304] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+1506616909449	geckodriver	INFO	Listening on 127.0.0.1:55784
+1506616911391	mozprofile::profile	INFO	Using profile path C:\Users\tcf_7\AppData\Local\Temp\rust_mozprofile.gwZMtBsd1KZy
+1506616911400	geckodriver::marionette	INFO	Starting browser C:\Program Files\Mozilla Firefox\firefox.exe
+1506616911464	geckodriver::marionette	INFO	Connecting to Marionette on localhost:55791
+1506616914424	Marionette	INFO	Listening on port 55791
