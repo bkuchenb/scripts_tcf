@@ -151,7 +151,6 @@ for x in range(0, len(orderList)):
         #Check the orders table.
         query = ('SELECT * FROM tcf_orders WHERE orderID = "{0}"')
         query = query.format(orderList[x][0])
-        print(query)
         cursor.execute(query)
         cursor.fetchone()
         #If the order ID was found, print a message.
@@ -161,7 +160,6 @@ for x in range(0, len(orderList)):
         #Check the orderDetails table.
         query = ('SELECT * FROM tcf_orderdetails WHERE orderID = "{0}"')
         query = query.format(orderList[x][0])
-        print(query)
         cursor.execute(query)
         cursor.fetchall()
         #If the order ID was found, print a message.
@@ -176,7 +174,6 @@ for x in range(0, len(orderList)):
         #Check the customers table.
         query = ('SELECT * FROM tcf_customers WHERE email = "{0}"')
         query = query.format(orderList[x][3])
-        print(query)
         cursor.execute(query)
         cursor.fetchone()
         #If the email was found, print a message.
@@ -284,7 +281,6 @@ for x in range(0, len(orderList)):
                                  orderList[x][1], orderList[x][2],
                                  orderList[x][7], orderList[x][8],
                                  orderList[x][9])
-            print(query)
             cursor.execute(query)   
             cnx.commit()
             #Print a message indicating the order was added.
@@ -312,7 +308,6 @@ for x in range(0, len(orderList)):
                                      card[4], cnx.converter.escape(card[5]),
                                      card[6], card[7], card[8], card[9],
                                      orderList[x][0])
-                print(query)
                 cursor.execute(query)
 #			 #Adjust the inventory if possible.
 #                #Check the overflow database to see if the details are available.
@@ -393,7 +388,6 @@ for x in range(0, len(orderList)):
                                 customerInfo[1], customerInfo[2],
                                 customerInfo[3], customerInfo[4],
                                 customerInfo[5], customerInfo[6])
-            print(query)
             cursor.execute(query)
             cnx.commit()
             #Print a message indicating all cards were added.
