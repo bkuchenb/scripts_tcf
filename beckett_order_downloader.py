@@ -52,14 +52,14 @@ wait = WebDriverWait(browser, 10)
 #Get today's date.
 today = datetime.date.today()
 #Get the date for 8 days ago.
-start_date = today - datetime.timedelta(days = 8)
+start_date = today - datetime.timedelta(days = 21)
 #Get yesterday's date.
 end_date = today - datetime.timedelta(days = 1)
 #Save the two dates as strings.
 start_date = start_date.strftime("%m/%d/%y")
 end_date = end_date.strftime("%m/%d/%y")
 #Optional date range override##################################################
-#start_date = '09/28/2016'
+#start_date = '04/01/2017'
 #end_date = '10/4/2016'
 #Optional date range override##################################################
 #Open the Beckett admin page.
