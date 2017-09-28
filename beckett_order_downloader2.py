@@ -31,7 +31,8 @@ user = 'bk00chenb'
 password = 'NR8A*Ecb*'
 host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
 database = 'inceff'
-cnx = mysql.connector.connect(user, password, host, database)
+cnx = mysql.connector.connect(user=user, password=password,
+                              host=host, database=database)
 #Create a cursor object to use for the database connection.
 cursor = cnx.cursor()
 #Set the autocommit to zero.
@@ -140,7 +141,7 @@ for x in range(0, len(orderIds)):
 #Print a message indicating how many orders were found
 print(len(orderIds), 'were found between', start_date, 'and', end_date + '.')
 print()
-#Cycle through the order IDs and query the tables
+#Cycle through the order IDs and query the tables.
 for x in range(0, len(orderList)):
     #Create 3 variable to save query results.
     in_orders_table = False
@@ -150,6 +151,7 @@ for x in range(0, len(orderList)):
         #Check the orders table.
         query = ('SELECT * FROM tcf_orders WHERE orderID = "{0}"')
         query = query.format(orderList[x][0])
+        print(query)
         cursor.execute(query)
         cursor.fetchone()
         #If the order ID was found, print a message.
@@ -159,6 +161,7 @@ for x in range(0, len(orderList)):
         #Check the orderDetails table.
         query = ('SELECT * FROM tcf_orderdetails WHERE orderID = "{0}"')
         query = query.format(orderList[x][0])
+        print(query)
         cursor.execute(query)
         cursor.fetchall()
         #If the order ID was found, print a message.
@@ -173,6 +176,7 @@ for x in range(0, len(orderList)):
         #Check the customers table.
         query = ('SELECT * FROM tcf_customers WHERE email = "{0}"')
         query = query.format(orderList[x][3])
+        print(query)
         cursor.execute(query)
         cursor.fetchone()
         #If the email was found, print a message.
@@ -280,6 +284,7 @@ for x in range(0, len(orderList)):
                                  orderList[x][1], orderList[x][2],
                                  orderList[x][7], orderList[x][8],
                                  orderList[x][9])
+            print(query)
             cursor.execute(query)   
             cnx.commit()
             #Print a message indicating the order was added.
@@ -306,7 +311,8 @@ for x in range(0, len(orderList)):
                 query = query.format(card[0], card[1], card[2], card[3],
                                      card[4], cnx.converter.escape(card[5]),
                                      card[6], card[7], card[8], card[9],
-                                     orderList[x][0])            
+                                     orderList[x][0])
+                print(query)
                 cursor.execute(query)
 #			 #Adjust the inventory if possible.
 #                #Check the overflow database to see if the details are available.
@@ -386,7 +392,8 @@ for x in range(0, len(orderList)):
                                 orderList[x][5], customerInfo[0],
                                 customerInfo[1], customerInfo[2],
                                 customerInfo[3], customerInfo[4],
-                                customerInfo[5], customerInfo[6])             
+                                customerInfo[5], customerInfo[6])
+            print(query)
             cursor.execute(query)
             cnx.commit()
             #Print a message indicating all cards were added.

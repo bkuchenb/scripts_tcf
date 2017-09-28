@@ -2554,3 +2554,33 @@ JavaScript error: chrome://browser/content/tabbrowser.xml, line 2967: TypeError:
 1506616911400	geckodriver::marionette	INFO	Starting browser C:\Program Files\Mozilla Firefox\firefox.exe
 1506616911464	geckodriver::marionette	INFO	Connecting to Marionette on localhost:55791
 1506616914424	Marionette	INFO	Listening on port 55791
+1506622287758	geckodriver	INFO	Listening on 127.0.0.1:57877
+1506622289632	mozprofile::profile	INFO	Using profile path C:\Users\tcf_7\AppData\Local\Temp\rust_mozprofile.sXc5nABOptD0
+1506622289643	geckodriver::marionette	INFO	Starting browser C:\Program Files\Mozilla Firefox\firefox.exe
+1506622289668	geckodriver::marionette	INFO	Connecting to Marionette on localhost:57883
+1506622291164	Marionette	INFO	Listening on port 57883
+1506622440182	geckodriver	INFO	Listening on 127.0.0.1:58047
+1506622442102	mozprofile::profile	INFO	Using profile path C:\Users\tcf_7\AppData\Local\Temp\rust_mozprofile.ZiUqF4EbG4ZV
+1506622442111	geckodriver::marionette	INFO	Starting browser C:\Program Files\Mozilla Firefox\firefox.exe
+1506622442134	geckodriver::marionette	INFO	Connecting to Marionette on localhost:58053
+1506622443628	Marionette	INFO	Listening on port 58053
+[Parent 7184] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+[Parent 7184] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+1506623266865	geckodriver	INFO	Listening on 127.0.0.1:60720
+1506623268842	mozprofile::profile	INFO	Using profile path C:\Users\tcf_7\AppData\Local\Temp\rust_mozprofile.KttgGQRAleDl
+1506623268850	geckodriver::marionette	INFO	Starting browser C:\Program Files\Mozilla Firefox\firefox.exe
+1506623268869	geckodriver::marionette	INFO	Connecting to Marionette on localhost:60742
+1506623270136	Marionette	INFO	Listening on port 60742
+[Parent 7024] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+[Parent 7024] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+[Parent 7024] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+[Child 7296] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+1506624084068	geckodriver::marionette	ERROR	Failed to kill browser process
+1506624120222	geckodriver	INFO	Listening on 127.0.0.1:52184
+1506624122098	mozprofile::profile	INFO	Using profile path C:\Users\tcf_7\AppData\Local\Temp\rust_mozprofile.FaAS6Rnq7Wgv
+1506624122108	geckodriver::marionette	INFO	Starting browser C:\Program Files\Mozilla Firefox\firefox.exe
+1506624122133	geckodriver::marionette	INFO	Connecting to Marionette on localhost:52221
+1506624124078	Marionette	INFO	Listening on port 52221
+[Parent 6872] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+[Parent 6872] WARNING: pipe error: 109: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/chromium/src/chrome/common/ipc_channel_win.cc, line 346
+[Child 4780] ###!!! ABORT: Aborting on channel error.: file c:/builds/moz2_slave/m-rel-w32-00000000000000000000/build/src/ipc/glue/MessageChannel.cpp, line 2056
