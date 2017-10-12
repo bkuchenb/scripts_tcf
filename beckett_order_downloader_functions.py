@@ -137,3 +137,4 @@ def format_customer_info(text, customerInfo):
             print (("Error in {0} on line {1}").format(fname, lineno))
         input("Press Enter to continue...")
     return customerInfo
+        

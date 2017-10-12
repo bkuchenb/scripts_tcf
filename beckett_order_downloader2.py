@@ -26,7 +26,7 @@ import time
 from beckett_order_downloader_functions import format_item_description
 from beckett_order_downloader_functions import format_customer_info
 
-#Connect to tcf_beckett database.
+#Connect to inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
 host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
@@ -34,7 +34,7 @@ database = 'inceff'
 cnx = mysql.connector.connect(user=user, password=password,
                               host=host, database=database)
 #Create a cursor object to use for the database connection.
-cursor = cnx.cursor()
+cursor = cnx.cursor(buffered = True)
 #Set the autocommit to zero.
 cursor.execute('SET autocommit = 0')
 cnx.commit()
@@ -309,48 +309,25 @@ for x in range(0, len(orderList)):
                                      card[6], card[7], card[8], card[9],
                                      orderList[x][0])
                 cursor.execute(query)
-#			 #Adjust the inventory if possible.
-#                #Check the overflow database to see if the details are available.
-#                overflow_check = ('SELECT id, details FROM {0} '
-#                                 + 'WHERE year = "{1}" AND set_name = "{2}"')
-#                overflow_check = overflow_check.format(card[1].lower(),
-#                                                       card[2], card[3])
-#                overflow_cursor.execute(overflow_check)
-#                overflow_results = overflow_cursor.fetchone()
-#                if(overflow_results[1] != 0):
-#                    #Build the database name.
-#                    db_name = 'tcf_inventory_' + sport.lower()
-#                    #Connect to correct database.
-#                    inv_cnx = mysql.connector.connect(user='Mickey',
-#                                                      password = 'R00thMick',
-#                                                      host = 'localhost',
-#                                                      database = db_name)
-#                    #Save the table name.
-#                    table = sport.lower() + '_' + str(overflow_results[0])
-#                    #Create a cursor object
-#                    inv_cursor = inv_cnx.cursor()
-#                    select = ('SELECT card_number, name, cond_price, quantity '
-#                             + 'FROM {0} '
-#                             + 'WHERE card_number = "{1}" AND name = "{2}"')
-#                    select = select.format(table, card[4],
-#                                           inv_cnx.converter.escape(card[5]))
-#                    inv_cursor.execute(select)
-#                    inv_results = inv_cursor.fetchall()
-#                    if(len(inv_results) > 1):
-#                        for card_cond in inv_results:
-#                            if card_cond[2] == card[8]:
-#                                print('Price match found!')
-#                    else:
-#                        if(inv_results[0][3] >= int(card[7])):
-#                            new_qty = int(inv_results[0][3]) - int(card[7])
-#                        else:
-#                            new_qty = 0
-#                    update = ('UPDATE {0} SET quantity = "{1}" '
-#                             + 'WHERE card_number = "{2}" AND name = "{3}"')
-#                    update = update.format(table, new_qty, card[4],
-#                                           cnx.converter.escape(card[5]))
-#                    inv_cursor.execute(update)
-#                    inv_cnx.commit()                
+                #Search the tcf_sets table for the set.
+                query2 = ('SELECT set_id FROM tcf_sets '
+                + 'WHERE set_year = "{0}" AND category = "{1}" '
+                + 'AND set_name = "{2}"')
+                query2 = query2.format(card[2], card[1], card[3])
+                cursor.execute(query2)
+                cursor.fetchall()
+                #If the set was found, print a message.
+                temp_str = card[1] + ' ' + card[2] + ' ' + card[3]
+                if(cursor.rowcount == 1):
+                    print(temp_str, 'was found in tcf_sets.')
+                else:
+                    #If the set wasn't found, add it to the table.
+                    query3 = ('INSERT INTO tcf_sets(set_year, category, '
+                    'set_name) VALUES("{0}", "{1}", "{2}")')
+                    query3 = query3.format(card[2], card[1], card[3])
+                    cursor.execute(query3)
+                    cnx.commit()
+                    print(temp_str, 'was added to tcf_sets.')               
             except mysql.connector.Error as err:
                 print("Something went wrong: {}".format(err))
                 for frame in traceback.extract_tb(sys.exc_info()[2]):
