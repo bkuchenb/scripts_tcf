@@ -31,26 +31,23 @@ user = 'bk00chenb'
 password = 'NR8A*Ecb*'
 host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
 database = 'inceff'
-cnx = mysql.connector.connect(user=user, password=password,
+cnx = MySQLdb.connect(user=user, password=password,
                               host=host, database=database)
 #Create a cursor object to use for the database connection.
-cursor = cnx.cursor(buffered = True)
+cursor = cnx.cursor()
 #Set the autocommit to zero.
 cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Set the capabilites.
-firefox_capabilities = DesiredCapabilities.FIREFOX
-firefox_capabilities['marionette'] = True
-browser = webdriver.Firefox(capabilities=firefox_capabilities)
-
+browser = webdriver.Firefox()
 #Set the browser wait time to 10 seconds.
 wait = WebDriverWait(browser, 10)
 
 #Get today's date.
 today = datetime.date.today()
 #Get the date for 8 days ago.
-start_date = today - datetime.timedelta(days = 21)
+start_date = today - datetime.timedelta(days = 28)
 #Get yesterday's date.
 end_date = today - datetime.timedelta(days = 1)
 #Save the two dates as strings.
@@ -180,7 +177,7 @@ for x in range(0, len(orderList)):
         if cursor.rowcount == 1:
             in_customers_table = True
             print(orderList[x][4], orderList[x][5], 'has already been added.')
-    except mysql.connector.Error as err:
+    except MySQLdb.Error as err:
         print("Something went wrong: {}".format(err))
         print(query)
         input("Press Enter to continue...")
@@ -286,7 +283,7 @@ for x in range(0, len(orderList)):
             #Print a message indicating the order was added.
             print('Order', orderList[x][0], 'was added to the orders '
                  + 'table.')
-        except mysql.connector.Error as err:
+        except MySQLdb.Error as err:
             #If the update fails, print a message and the query.
             print("Something went wrong: {}".format(err))
             print('Order', orderList[x][0], 'was not added!')
@@ -305,30 +302,30 @@ for x in range(0, len(orderList)):
                         + '"{2}", "{3}", "{4}", "{5}", "{6}", "{7}", '
                         + '"{8}", "{9}", "{10}")')
                 query = query.format(card[0], card[1], card[2], card[3],
-                                     card[4], cnx.converter.escape(card[5]),
+                                     card[4], cnx.escape_string(card[5]),
                                      card[6], card[7], card[8], card[9],
                                      orderList[x][0])
                 cursor.execute(query)
-                #Search the tcf_sets table for the set.
-                query2 = ('SELECT set_id FROM tcf_sets '
-                + 'WHERE set_year = "{0}" AND category = "{1}" '
-                + 'AND set_name = "{2}"')
-                query2 = query2.format(card[2], card[1], card[3])
-                cursor.execute(query2)
-                cursor.fetchall()
-                #If the set was found, print a message.
-                temp_str = card[1] + ' ' + card[2] + ' ' + card[3]
-                if(cursor.rowcount == 1):
-                    print(temp_str, 'was found in tcf_sets.')
-                else:
-                    #If the set wasn't found, add it to the table.
-                    query3 = ('INSERT INTO tcf_sets(set_year, category, '
-                    'set_name) VALUES("{0}", "{1}", "{2}")')
-                    query3 = query3.format(card[2], card[1], card[3])
-                    cursor.execute(query3)
-                    cnx.commit()
-                    print(temp_str, 'was added to tcf_sets.')               
-            except mysql.connector.Error as err:
+#                #Search the tcf_sets table for the set.
+#                query2 = ('SELECT set_id FROM tcf_sets '
+#                + 'WHERE set_year = "{0}" AND category = "{1}" '
+#                + 'AND set_name = "{2}"')
+#                query2 = query2.format(card[2], card[1], card[3])
+#                cursor.execute(query2)
+#                cursor.fetchall()
+#                #If the set was found, print a message.
+#                temp_str = card[1] + ' ' + card[2] + ' ' + card[3]
+#                if(cursor.rowcount == 1):
+#                    print(temp_str, 'was found in tcf_sets.')
+#                else:
+#                    #If the set wasn't found, add it to the table.
+#                    query3 = ('INSERT INTO tcf_sets(set_year, category, '
+#                    'set_name) VALUES("{0}", "{1}", "{2}")')
+#                    query3 = query3.format(card[2], card[1], card[3])
+#                    cursor.execute(query3)
+#                    cnx.commit()
+#                    print(temp_str, 'was added to tcf_sets.')
+            except MySQLdb.Error as err:
                 print("Something went wrong: {}".format(err))
                 for frame in traceback.extract_tb(sys.exc_info()[2]):
                     fname,lineno,fn,text = frame
@@ -370,7 +367,7 @@ for x in range(0, len(orderList)):
             #Print a message indicating all cards were added.
             print(orderList[x][4], orderList[x][5],
                   'was added to the customers table.')
-        except mysql.connector.Error as err:
+        except MySQLdb.Error as err:
             #If the update fails, print a message and the query.
             print("Something went wrong: {}".format(err))
             print('Details for order', orderList[x][0],
