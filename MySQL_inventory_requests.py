@@ -12,119 +12,94 @@ from bs4 import BeautifulSoup
 import time
 import random
 def sql_insert_card(card_data):
-    #Add the card to tcf_cards.
+    #Add the card to tcf_card.
     insert_card = ("INSERT INTO tcf_card"
                    "(card_id, set_id, card_number, card_name, "
-                   "team_id, player_id, value_high, value_low) "
-                   "VALUES(%(card_id)s, %(set_id)s, %(card_number)s, "
-                   "%(card_name)s, %(team_link)s, %(player_number)s, "
-                   "%(value_high)s, %(value_low)s)")
+                   "image_src_back, image_src_front, "
+                   "value_high, value_low, print_run) "
+                   "VALUES({card_id}, {set_id}, {card_number!r}, "
+                   "{card_name!r}, {image_src_back!r}, {image_src_front!r}, "
+                   "{value_high}, {value_low}, {print_run})")
 #debugging-------------------------------------------------------------------->
-    #print(insert_card % card_data)
+    #print(insert_card.format(**card_data))
     try:
-        cursor.execute(insert_card, card_data)
+        cursor.execute(insert_card.format(**card_data))
         cnx.commit()
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
-        print(insert_card % card_data)
-        insert_error = ("INSERT INTO tcf_sql_errors"
-                        "(insert_statement) "
-                        "VALUES(%(card_url)s)")
-        cursor.execute(insert_error, card_data)
-        cnx.commit()
+        print(insert_card.format(**card_data))
 def sql_insert_inventory(card_data):
     #Add the card to tcf_inventory.
     insert_card = ("INSERT INTO tcf_inventory"
-                   "(card_id, set_id, inventory_id, condition, "
+                   "(card_id, inventory_id, condition, "
                    "quantity, max, min, price) "
-                   "VALUES(%(card_id)s, %(set_id)s, %(inventory_id)s, "
-                   "%(condition)s, %(quantity)s, %(max)s, "
-                   "%(min)s, %(price)s)")
+                   "VALUES{card_id}s, {inventory_id}, "
+                   "{condition!r}, {quantity}, {max}, "
+                   "{min}, {price})")
 #debugging-------------------------------------------------------------------->
-    #print(insert_card % card_data)
+    #print(insert_card.format(card_data))
     try:
-        cursor.execute(insert_card, card_data)
+        cursor.execute(insert_card.format(card_data))
         cnx.commit()
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
-        print(insert_card % card_data)
-        insert_error = ("INSERT INTO tcf_sql_errors"
-                        "(insert_statement) "
-                        "VALUES(%(card_url)s)")
-        cursor.execute(insert_error, card_data)
-        cnx.commit()
+        print(insert_card.format(card_data))
 def sql_insert_player(card_data):
-    #Add the set to tcf_players
+    #Add the set to tcf_player
     insert_player = ("INSERT INTO tcf_player"
                    "(player_id, player_name) "
-                   "VALUES(%(player_id)s, %(player_name)s)")
+                   "VALUES({player_id}, {player_name!r})")
 #debugging-------------------------------------------------------------------->
-    #print(insert_player % card_data)
+    #print(insert_player.format(**card_data))
     try:
-        cursor.execute(insert_player, card_data)
+        cursor.execute(insert_player.format(**card_data))
         cnx.commit()
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
-        print(insert_player % card_data)
-        insert_error = ("INSERT INTO tcf_sql_errors"
-                        "(insert_statement) "
-                        "VALUES(%(player_link)s)")
-        cursor.execute(insert_error, card_data)
-        cnx.commit()
+        print(insert_player.format(**card_data))
 def sql_insert_set(card_data):
-    #Add the set to tcf_sets2
-#    insert_set = ("INSERT INTO tcf_sets2"
-#                   "(set_year, category, set_name) "
-#                   "VALUES(%(set_year)s, %(category)s, %(set_name)s")
+    #Add the set to tcf_set if there is only one manufacturer and one brand.
+    if(len(card_data['manufacturer_id']) > 1 or len(card_data['brand_id']) > 1):
+        return
     insert_set = ("INSERT INTO tcf_set"
-                   "(set_year, category_id, set_name, manufacturer_id, "
+                   "(set_year, set_name, manufacturer_id, "
                    "brand_id) "
-                   "VALUES(%(set_year)s, %(category_id)s, %(set_name)s, "
-                   "%(manufacturer_id)s, %(brand_id)s")
+                   "VALUES({set_year!r}, {set_name!r}, "
+                   "{manufacturer_id[0]}, {brand_id[0]})")
 #debugging-------------------------------------------------------------------->
-    #print(insert_set % card_data)
+    print(insert_set.format(**card_data))
     try:
-        cursor.execute(insert_set, card_data)
+        cursor.execute(insert_set.format(**card_data))
         cnx.commit()
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
-        print(insert_set % card_data)
-        insert_error = ("INSERT INTO tcf_sql_errors"
-                        "(insert_statement) "
-                        "VALUES(%(set_name_link)s)")
-        cursor.execute(insert_error, card_data)
-        cnx.commit()
+        print(insert_set.format(**card_data))
 def sql_insert_team(card_data):
     #Add the set to tcf_players
     insert_team = ("INSERT INTO tcf_team"
                    "(team_id, team_name) "
-                   "VALUES(%(team_id)s, %(team_name)s)")
+                   "VALUES({team_id}, {team_name!r})")
 #debugging-------------------------------------------------------------------->
-    #print(insert_team % card_data)
+    #print(insert_team.format(**card_data))
     try:
-        cursor.execute(insert_team, card_data)
+        cursor.execute(insert_team.format(**card_data))
         cnx.commit()
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
-        print(insert_team % card_data)
-        insert_error = ("INSERT INTO tcf_sql_errors"
-                        "(insert_statement) "
-                        "VALUES(%(team_link)s)")
-        cursor.execute(insert_error, card_data)
-        cnx.commit()
+        print(insert_team.format(**card_data))
 def sql_select_card(card_data):
     #Get the card_id.
     select_card = ("SELECT card_id "
                   "FROM tcf_card "
-                  "WHERE card_id = %(card_id)s")
+                  "WHERE card_id = {card_id}")
 #debugging-------------------------------------------------------------------->
-    #print(select_card % card_data)
-    cursor.execute(select_card, card_data)
+    #print(select_card.format(**card_data))
+    cursor.execute(select_card.format(**card_data))
     card_id = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
     #print(len(card_id), 'card(s) were found.')
@@ -133,10 +108,10 @@ def sql_select_inventory(card_data):
     #Get the card_id.
     select_card = ("SELECT inventory_id "
                   "FROM tcf_inventory "
-                  "WHERE inventory_id = %(inventory_id)s")
+                  "WHERE inventory_id = {inventory_id}")
 #debugging-------------------------------------------------------------------->
-    #print(select_card % card_data)
-    cursor.execute(select_card, card_data)
+    #print(select_card.format(**card_data))
+    cursor.execute(select_card.format(**card_data))
     card_id = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
     #print(len(card_id), 'card(s) were found.')
@@ -153,17 +128,19 @@ def sql_select_player(card_data):
     return len(player_id)
 def sql_select_set(card_data):
     #Get the set_id.
-    select_set = ("SELECT set_id "
+    select_set = ("SELECT tcf_set.set_id "
                   "FROM tcf_set "
-                  "WHERE set_year = %(set_year)s "
-                  "AND category_id = %(category_id)s "
-                  "AND set_name = %(set_name)s")
+                  "INNER JOIN tcf_set_category "
+                  "ON tcf_set.set_id = tcf_set_category.set_id "
+                  "WHERE tcf_set.set_year = {set_year!r} "
+                  "AND tcf_set_category.category_id = {category_id_temp} "
+                  "AND tcf_set.set_name = {set_name!r}")
 #debugging-------------------------------------------------------------------->
-    #print(select_set % card_data)
-    cursor.execute(select_set, card_data)
+    print(select_set.format(**card_data))
+    cursor.execute(select_set.format(**card_data))
     set_id = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    #print(len(set_id), 'set(s) were found.')
+    print(len(set_id), 'set(s) were found.')
     return set_id
 def sql_select_team(card_data):
     #Get the team_id.
@@ -388,7 +365,7 @@ def get_inventory_page_data(soup, data_list):
         li_list = soup.find_all('li', 'title')
 #debugging-------------------------------------------------------------------->
         #For each card on the page, scrape the data and check the database.
-        for i in range(0, 10):
+        for i in range(0, 1):
         # for i in range(0, len(li_list)):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
@@ -553,14 +530,18 @@ for x in range(page - 1, 1):
 #debugging-------------------------------------------------------------------->
         print(row)
         print()
-        # #Check tcf_inventory to see if this card has been added.
-# #function call---------------------------------------------------------------->
-        # #Add the set if it isn't in the table.
-        # set_id = sql_select_set(row)
-        # if(len(set_id) == 0):
-            # sql_insert_set(row)
-            # set_id = sql_select_set(row)
-        # row['set_id'] = set_id[0][0]
+        #Check tcf_inventory to see if this card has been added.
+#function call---------------------------------------------------------------->
+        #Add the set if it isn't in the table.
+        #Check to see if there is more than 1 category_id.
+        for entry in row['category_id']:
+            #Set the category_id to be used in each iteration.
+            row['category_id_temp'] = entry
+            set_id = sql_select_set(row)            
+            if(len(set_id) == 0):
+                sql_insert_set(row)
+                set_id = sql_select_set(row)
+            row['set_id'] = set_id[0][0]
         # #Add the card if it isn't in the table.
         # count = sql_select_card(row)
         # if(count == 0):
