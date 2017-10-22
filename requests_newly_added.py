@@ -407,11 +407,16 @@ def get_card_checklist_page(card_soup, card_data):
             card_data['card_number'] = temp_str
         if 'Other Attributes:' in temp_str:
             temp_str = temp_str.replace('Other Attributes:', '').strip()
+            temp_str = temp_str.replace('(', '').strip()
+            temp_str = temp_str.replace(')', '').strip()
             card_data['attribute_name'].append(temp_str)
         if 'Attributes:' in temp_str:
             #Get the links with the attribute_name.
             a_list = row.find_all('a')
             for entry in a_list:
+                temp_str = entry.text.strip()
+                temp_str = temp_str.replace('(', '').strip()
+                temp_str = temp_str.replace(')', '').strip()
                 card_data['attribute_name'].append(entry.text)
         if 'Print Run:' in temp_str:
             temp_str = temp_str.replace('Print Run:', '').strip()
@@ -695,7 +700,7 @@ def search_for_card(url):
     c = r.content
     #Parse the content.
     return BeautifulSoup(c, 'lxml')
-def set_currency()
+def set_currency():
     url = ('https://www.beckett.com/home/update_currency_country')
     payload = {'currency': '1'}
     try:
