@@ -20,7 +20,7 @@ def sql_insert_brand(card_data, index):
               "VALUES({brand_id[" + str(index) + "]}, "
               "{brand_name[" + str(index) + "]!r})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -37,7 +37,7 @@ def sql_insert_card(card_data):
               "{card_name!r}, {image_src_back!r}, {image_src_front!r}, "
               "{value_high}, {value_low}, {print_run})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -49,7 +49,7 @@ def sql_insert_card_attribute(card_data, index):
     insert = ("INSERT INTO tcf_card_attribute(card_id, attribute_id) "
               "VALUES({card_id}, {attribute_id}")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -62,7 +62,7 @@ def sql_insert_card_player(card_data, index):
               "VALUES({player_id[" + str(index) + "]}, "
               "{card_id})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -75,7 +75,7 @@ def sql_insert_card_team(card_data, index):
               "VALUES({team_id[" + str(index) + "]}, "
               "{card_id})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -88,7 +88,7 @@ def sql_insert_category(card_data, index):
               "VALUES({category_id[" + str(index) + "]}, "
               "{category_name[" + str(index) + "]!r})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -102,7 +102,7 @@ def sql_insert_inventory(card_data):
               "VALUES({inventory_id}, {card_id}, {condition!r}, "
               "{quantity}, {max}, {min}, {price})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -120,7 +120,7 @@ def sql_insert_manufacturer(card_data, index):
               "VALUES({manufacturer_id[" + str(index) + "]}, "
               "{manufacturer_name[" + str(index) + "]!r})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -137,7 +137,7 @@ def sql_insert_player(card_data, index):
               "VALUES({player_id[" + str(index) + "]}, "
               "{player_name[" + str(index) + "]!r})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -156,7 +156,7 @@ def sql_insert_set(card_data):
               "VALUES({set_year!r}, {set_name!r}, "
               "{manufacturer_id[0]}, {brand_id[0]})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -169,7 +169,7 @@ def sql_insert_set_category(card_data, index):
               "VALUES({category_id[" + str(index) + "]}, "
               "{set_id})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -186,7 +186,7 @@ def sql_insert_team(card_data, index):
               "VALUES({team_id[" + str(index) + "]}, "
               "{team_name[" + str(index) + "]!r})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -199,7 +199,7 @@ def sql_select_attribute(card_data, index):
               "FROM tcf_attribute "
               "WHERE attribute_name = {attribute_name[" + str(index) + "]!r}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -210,7 +210,7 @@ def sql_select_brand(card_data, index):
               "FROM tcf_brand "
               "WHERE brand_id = {brand_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -221,7 +221,7 @@ def sql_select_card(card_data):
               "FROM tcf_card "
               "WHERE card_id = {card_id}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -233,7 +233,7 @@ def sql_select_card_attribute(card_data, index):
               "WHERE card_id = {card_id} "
               "AND attribute_id = {attribute_id}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -245,7 +245,7 @@ def sql_select_card_player(card_data, index):
               "WHERE card_id = {card_id} "
               "AND player_id = {player_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -257,7 +257,7 @@ def sql_select_card_team(card_data, index):
               "WHERE card_id = {card_id} "
               "AND team_id = {team_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -268,7 +268,7 @@ def sql_select_category(card_data, index):
               "FROM tcf_category "
               "WHERE category_id = {category_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -279,7 +279,7 @@ def sql_select_inventory(card_data):
               "FROM tcf_inventory "
               "WHERE inventory_id = {inventory_id}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -290,7 +290,7 @@ def sql_select_manufacturer(card_data, index):
               "FROM tcf_manufacturer "
               "WHERE manufacturer_id = {manufacturer_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -301,7 +301,7 @@ def sql_select_player(card_data, index):
               "FROM tcf_player "
               "WHERE player_id = {player_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -316,7 +316,7 @@ def sql_select_set(card_data, index):
               "AND tcf_set_category.category_id = {category_id[" + str(index) + "]} "
               "AND tcf_set.set_name = {set_name!r}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -328,7 +328,7 @@ def sql_select_set_category(card_data, index):
               "WHERE set_id = {set_id} "
               "AND category_id = {category_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -339,14 +339,14 @@ def sql_select_set_id():
     cursor.execute(select)
     result = cursor.fetchone()[0]
 #debugging-------------------------------------------------------------------->
-    print(result)
+    #print(result)
     return result
 def sql_select_team(card_data, index):
     select = ("SELECT team_id "
               "FROM tcf_team "
               "WHERE team_id = {team_id[" + str(index) + "]}")
 #debugging-------------------------------------------------------------------->
-    print(select.format(**card_data))
+    #print(select.format(**card_data))
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
@@ -357,7 +357,7 @@ def sql_update_inventory(card_data):
               "Set quantity = {quantity}, price = {price} "
               "WHERE card_id = {card_id}")
 #debugging-------------------------------------------------------------------->
-    print(update.format(**card_data))
+    #print(update.format(**card_data))
     try:
         cursor.execute(update.format(**card_data))
         cnx.commit()
@@ -697,6 +697,24 @@ def search_for_card(url):
     c = r.content
     #Parse the content.
     return BeautifulSoup(c, 'lxml')
+def set_currency()
+    url = ('https://www.beckett.com/home/update_currency_country')
+    payload = {'currency': '1'}
+    try:
+        r = requests.post(url, data=payload)
+        print(r.status_code)
+        #Save the content.
+        c = r.content
+        #Parse the content.
+        soup = BeautifulSoup(c, 'lxml')
+        #Check the active currency.
+        span_list = soup.fin_all('span', 'currency')
+        print('Currency:', span_list[0].text)
+        if(span_list[0].text != 'USD'):
+            print('Wrong currency.')
+    except requests.Timeout as err:
+        print('Something went wrong: {}'.format(err))
+        exception_list.append(url)
 #Connect to the inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
@@ -712,15 +730,9 @@ cnx.commit()
 
 #Create a list to hold exceptions.
 exception_list = list()
-#Set the default currency.
-# url = ('https://www.beckett.com/home/update_currency_country/?currency=1')
-url = ('https://www.beckett.com/home/update_currency_country')
-payload = {'currency': '1'}
-try:
-    r = requests.post(url, data=payload)
-except requests.Timeout as err:
-    print('Something went wrong: {}'.format(err))
-    exception_list.append(url)
+#Set the currency.
+set_currency()
+
 page = 5
 #Go to the tcf marketplace page and search newly added items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
@@ -743,10 +755,13 @@ for x in range(page - 1, page_links['last_page_num']):
     data_list = list()
 #function call---------------------------------------------------------------->
     data_list = get_inventory_page_data(soup, data_list)
+    #Create a counter to track which card is being updated.
+    counter = 1
     #Add the cards to the inceff database.
     for row in data_list:
 #debugging-------------------------------------------------------------------->
         #print(row, '\n')
+        print('SQL for card:', counter)
         
         #Check to see if there is more than 1 brand_id.
         for index in range(0, len(row['brand_id'])):
@@ -844,6 +859,7 @@ for x in range(page - 1, page_links['last_page_num']):
                 #If the card_attribute doesn't exist, insert it into tcf_card_attribute.
                 if(len(result) == 0):
                     sql_insert_card_attribute(row, index)
+        counter++
     if not(x == page_links['last_page_num'] - 1):
         #Wait a random time between page requests.
         #time.sleep(random.randint(20, 30))
