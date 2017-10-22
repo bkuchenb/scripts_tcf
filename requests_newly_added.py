@@ -45,7 +45,7 @@ def sql_insert_card(card_data):
         print(insert.format(**card_data))
 def sql_insert_card_attribute(card_data, index):
     insert = ("INSERT INTO tcf_card_attribute(card_id, attribute_id) "
-              "VALUES({card_id}, {attribute_id}")
+              "VALUES({card_id}, {attribute_id})")
 #debugging-------------------------------------------------------------------->
     #print(insert.format(**card_data))
     try:
