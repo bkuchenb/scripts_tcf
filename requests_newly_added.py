@@ -8,9 +8,7 @@ Created on Sat Oct  7 2017
 import MySQLdb
 import requests
 from bs4 import BeautifulSoup
-#Import time module to force the program to wait.
-import time
-import random
+
 def sql_insert_brand(card_data, index):
 #Add the item if the number of ids and names matches.
     if(len(card_data['brand_id']) != len(card_data['brand_name'])):
@@ -861,8 +859,6 @@ for x in range(page - 1, page_links['last_page_num']):
                     sql_insert_card_attribute(row, index)
         counter++
     if not(x == page_links['last_page_num'] - 1):
-        #Wait a random time between page requests.
-        #time.sleep(random.randint(20, 30))
 #function call---------------------------------------------------------------->
         try:
             soup = get_next_page(page_links['next_page_link'])
