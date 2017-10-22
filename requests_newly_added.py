@@ -311,7 +311,8 @@ def sql_select_set(card_data, index):
               "INNER JOIN tcf_set_category "
               "ON tcf_set.set_id = tcf_set_category.set_id "
               "WHERE tcf_set.set_year = {set_year!r} "
-              "AND tcf_set_category.category_id = {category_id[" + str(index) + "]} "
+              "AND tcf_set_category.category_id = "
+              "{category_id[" + str(index) + "]} "
               "AND tcf_set.set_name = {set_name!r}")
 #debugging-------------------------------------------------------------------->
     #print(select.format(**card_data))
@@ -379,7 +380,7 @@ def get_card_id(card_soup, card_data):
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
-        print(len(a_list), 'a elements were found in li element #:', i, '.')
+        print(len(a_list), 'a elements were found.')
 def get_card_checklist_page(card_soup, card_data):
     #Get the list that contains the data.
     class_name = 'similar-item similar-item-new'
@@ -585,7 +586,8 @@ def get_inventory_page_data(soup, data_list):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
                          'category_id': list(), 'category_name': list(),
-                         'manufacturer_id': list(), 'manufacturer_name': list(),
+                         'manufacturer_id': list(),
+                         'manufacturer_name': list(),
                          'player_id': list(), 'player_name': list(),
                          'team_id': list(), 'team_name': list(),
                          'set_id': '', 'set_year': '', 'set_name': '',
@@ -609,7 +611,7 @@ def get_inventory_page_data(soup, data_list):
                 card_soup = search_for_card(card_url)
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
-                exception_list.append(url)
+                exception_list.append(card_url)
 #function call---------------------------------------------------------------->
             card_data = get_card_tcf_marketplace(card_soup, card_data)
             #Find the card_id
@@ -711,13 +713,16 @@ def set_currency():
         #Parse the content.
         soup = BeautifulSoup(c, 'lxml')
         #Check the active currency.
-        span_list = soup.fin_all('span', 'currency')
-        print('Currency:', span_list[0].text)
-        if(span_list[0].text != 'USD'):
-            print('Wrong currency.')
+        get_currency(soup)
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
         exception_list.append(url)
+def get_currency(soup):
+    #Check the active currency.
+        span_list = soup.find_all('span', 'currency')
+        print('Currency:', span_list[0].text)
+        if(span_list[0].text != 'USD'):
+            set_currency(soup)
 #Connect to the inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
@@ -736,7 +741,7 @@ exception_list = list()
 #Set the currency.
 set_currency()
 
-page = 5
+page = 19
 #Go to the tcf marketplace page and search newly added items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
@@ -778,7 +783,7 @@ for x in range(page - 1, page_links['last_page_num']):
         for index in range(0, len(row['manufacturer_id'])):
             #Check to see if the manufacturer has already been added.
             result = sql_select_manufacturer(row, index)
-            #If the manufacturer doesn't exist, insert it into tcf_manufacturer.
+            #If the manufacturer doesn't exist, insert it.
             if(len(result) == 0):
                 sql_insert_manufacturer(row, index)
         
@@ -807,7 +812,7 @@ for x in range(page - 1, page_links['last_page_num']):
                 exception_list.append(temp_str)
             #Check to see if the set_category has already been added.
             result = sql_select_set_category(row, index)
-            #If the set_category doesn't exist, insert it into tcf_set_category.
+            #If the set_category doesn't exist, insert it.
             if(len(result) == 0):
                 sql_insert_set_category(row, index)
         #Check to see if the card has already been added to tcf_card.
@@ -859,10 +864,10 @@ for x in range(page - 1, page_links['last_page_num']):
                 row['attribute_id'] = result[0][0]
                 #Check to see if the card_attribute has already been added.
                 result = sql_select_card_attribute(row, index)
-                #If the card_attribute doesn't exist, insert it into tcf_card_attribute.
+                #If the card_attribute doesn't exist, insert it.
                 if(len(result) == 0):
                     sql_insert_card_attribute(row, index)
-        counter++
+        counter += 1
     if not(x == page_links['last_page_num'] - 1):
 #function call---------------------------------------------------------------->
         try:
