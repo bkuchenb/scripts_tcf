@@ -428,7 +428,7 @@ def get_card_checklist_page(card_soup, card_data):
                 #Get the official player_name.
                 try:
 #function call---------------------------------------------------------------->
-                    card_soup = search_for_card(temp_str)
+                    card_soup = request_page(temp_str)
                 except requests.Timeout as err:
                     print('Something went wrong: {}'.format(err))
                     print(temp_str)
@@ -603,7 +603,7 @@ def get_inventory_page_data(soup, data_list):
             #Get additional data from the scraped links.
 #function call---------------------------------------------------------------->
             try:
-                card_soup = search_for_card(card_url)
+                card_soup = request_page(card_url)
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
                 exception_list.append(url)
@@ -620,7 +620,7 @@ def get_inventory_page_data(soup, data_list):
             #Get the card_id.
 #function call---------------------------------------------------------------->
             try:
-                card_soup = search_for_card(url)
+                card_soup = request_page(url)
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
                 print(url)
@@ -629,7 +629,7 @@ def get_inventory_page_data(soup, data_list):
             #Get more information from the checklist_link.
 #function call---------------------------------------------------------------->
             try:
-                card_soup = search_for_card(card_data['checklist_link'])
+                card_soup = request_page(card_data['checklist_link'])
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
                 print(card_data['checklist_link'])
@@ -690,7 +690,7 @@ def get_player_page(card_soup, card_data):
         exception_list.append(str(len(div_list)) + ' div elements with '
         'className="pull-left paddingLeft10" were found.')
     return card_data
-def search_for_card(url):
+def request_page(url):
     #Get the card page.
     r = requests.get(url)
     #Save the content.

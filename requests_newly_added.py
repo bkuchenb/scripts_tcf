@@ -432,12 +432,12 @@ def get_card_checklist_page(card_soup, card_data):
                 #Get the official player_name.
                 try:
 #function call---------------------------------------------------------------->
-                    card_soup = search_for_card(temp_str)
+                    card_soup = request_page(temp_str)
                 except requests.Timeout as err:
                     print('Something went wrong: {}'.format(err))
                     print(temp_str)
 #function call---------------------------------------------------------------->
-                card_data = get_player_page(card_soup, card_data)
+                card_data = get_player_name(card_soup, card_data)
                 temp_list = temp_str.split('-')
                 temp_str = temp_list[len(temp_list) - 1]
                 card_data['player_id'].append(temp_str)
@@ -575,13 +575,12 @@ def get_card_price(card_soup, card_data):
         else:
             card_data['value_high'] = card_data['value_low']
     return card_data
-def get_inventory_page_data(soup, data_list):
+def get_tcf_storefront_data(soup, data_list):
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
 #debugging-------------------------------------------------------------------->
         #For each card on the page, scrape the data and check the database.
-        #for i in range(0, 10):
         for i in range(0, len(li_list)):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
@@ -608,7 +607,7 @@ def get_inventory_page_data(soup, data_list):
             #Get additional data from the scraped links.
 #function call---------------------------------------------------------------->
             try:
-                card_soup = search_for_card(card_url)
+                card_soup = request_page(card_url)
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
                 exception_list.append(card_url)
@@ -625,7 +624,7 @@ def get_inventory_page_data(soup, data_list):
             #Get the card_id.
 #function call---------------------------------------------------------------->
             try:
-                card_soup = search_for_card(url)
+                card_soup = request_page(url)
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
                 print(url)
@@ -634,7 +633,7 @@ def get_inventory_page_data(soup, data_list):
             #Get more information from the checklist_link.
 #function call---------------------------------------------------------------->
             try:
-                card_soup = search_for_card(card_data['checklist_link'])
+                card_soup = request_page(card_data['checklist_link'])
             except requests.Timeout as err:
                 print('Something went wrong: {}'.format(err))
                 print(card_data['checklist_link'])
@@ -646,13 +645,6 @@ def get_inventory_page_data(soup, data_list):
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
         print(len(a_list), 'a elements were found in li element #:', i, '.')
-def get_next_page(url):
-    #Get the next page.
-    r = requests.get(url)
-    #Save the content.
-    c = r.content
-    #Parse the content and return the results.
-    return BeautifulSoup(c, 'lxml')
 def get_page_links(soup):
     #Create a dictionary to store return values.
     page_links = {}
@@ -683,7 +675,7 @@ def get_page_links(soup):
         'className="last" were found.')
         exception_list.append(str(len(a_list2)) + ' a elements were found '
         'in the first li element.')
-def get_player_page(card_soup, card_data):
+def get_player_name(card_soup, card_data):
     class_name = 'pull-left paddingLeft10'
     #Get the official player_name.
     try:
@@ -695,13 +687,19 @@ def get_player_page(card_soup, card_data):
         exception_list.append(str(len(div_list)) + ' div elements with '
         'className="pull-left paddingLeft10" were found.')
     return card_data
-def search_for_card(url):
-    #Get the card page.
+def request_page(url):
+    #Get the page.
     r = requests.get(url)
     #Save the content.
     c = r.content
     #Parse the content.
     return BeautifulSoup(c, 'lxml')
+def get_currency(soup):
+    #Check the active currency.
+    span_list = soup.find_all('span', 'currency')
+    print('Currency:', span_list[0].text)
+    if(span_list[0].text != 'USD'):
+        set_currency(soup)
 def set_currency():
     url = ('https://www.beckett.com/home/update_currency_country')
     payload = {'currency': '1'}
@@ -717,12 +715,6 @@ def set_currency():
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
         exception_list.append(url)
-def get_currency(soup):
-    #Check the active currency.
-        span_list = soup.find_all('span', 'currency')
-        print('Currency:', span_list[0].text)
-        if(span_list[0].text != 'USD'):
-            set_currency(soup)
 #Connect to the inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
@@ -741,14 +733,14 @@ exception_list = list()
 #Set the currency.
 set_currency()
 
-page = 19
+page = 28
 #Go to the tcf marketplace page and search newly added items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
 #Make the soup.
 #function call---------------------------------------------------------------->
 try:
-    soup = get_next_page(url)
+    soup = request_page(url)
 except requests.Timeout as err:
     print('Something went wrong: {}'.format(err))
     exception_list.append(url)
@@ -762,7 +754,7 @@ for x in range(page - 1, page_links['last_page_num']):
     #Create a list to store card data.
     data_list = list()
 #function call---------------------------------------------------------------->
-    data_list = get_inventory_page_data(soup, data_list)
+    data_list = get_tcf_storefront_data(soup, data_list)
     #Create a counter to track which card is being updated.
     counter = 1
     #Add the cards to the inceff database.
@@ -871,7 +863,7 @@ for x in range(page - 1, page_links['last_page_num']):
     if not(x == page_links['last_page_num'] - 1):
 #function call---------------------------------------------------------------->
         try:
-            soup = get_next_page(page_links['next_page_link'])
+            soup = request_page(page_links['next_page_link'])
         except requests.Timeout as err:
             print('Something went wrong: {}'.format(err))
             print(page_links['next_page_link'])
