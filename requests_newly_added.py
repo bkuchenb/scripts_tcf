@@ -369,7 +369,7 @@ def get_card_id(card_soup, card_data):
         #Get all the card names that are displayed.
         li_list = card_soup.find_all('li', 'title')
         for entry in li_list:
-            if(card_data['card_name'] == entry.text):
+            if(card_data['card_name'] == entry.text.strip()):
                 #Get the a element that contains the information needed.
                 a_list = entry.find_all('a')
                 #Get the card_id from the link.
@@ -737,6 +737,11 @@ page = 28
 #Go to the tcf marketplace page and search newly added items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
+# #Override for first 10,000 items.
+# page = 7
+# #Go to the tcf marketplace page and search newly added items.
+# url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
+       # 'search_new/?result_type=59&page=' + str(page))
 #Make the soup.
 #function call---------------------------------------------------------------->
 try:
