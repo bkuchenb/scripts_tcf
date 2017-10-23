@@ -376,6 +376,8 @@ def get_card_id(card_soup, card_data):
                 temp_list = a_list[0]['href'].split('-')
                 card_data['card_id'] = temp_list[len(temp_list) - 1]
                 card_data['checklist_link'] = a_list[0]['href']
+            else:
+                print('We need to go to the next page here.')
         return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
@@ -736,15 +738,15 @@ exception_list = list()
 #Set the currency.
 set_currency()
 
-page = 29
-#Go to the tcf marketplace page and search newly added items.
-url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
-# #Override for first 10,000 items.
-# page = 7
+# page = 29
 # #Go to the tcf marketplace page and search newly added items.
 # url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       # 'search_new/?result_type=59&page=' + str(page))
+       # 'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
+#Override for first 10,000 items.
+page = 7
+#Go to the tcf marketplace page and search newly added items.
+url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
+       'search_new/?result_type=59&page=' + str(page))
 #Make the soup.
 #function call---------------------------------------------------------------->
 try:
