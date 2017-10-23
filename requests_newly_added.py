@@ -728,12 +728,15 @@ cursor = cnx.cursor()
 cursor.execute('SET autocommit = 0')
 cnx.commit()
 
+#Create a requests session.
+#s = requests.Session()
+
 #Create a list to hold exceptions.
 exception_list = list()
 #Set the currency.
 set_currency()
 
-page = 28
+page = 29
 #Go to the tcf marketplace page and search newly added items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
