@@ -372,8 +372,13 @@ def get_card_id(url, card_data, page_num):
         #Get all the card names that are displayed.
         li_list = card_soup.find_all('li')
         for entry in li_list:
+            #Save the card_name temporarily.
+            temp_str = card_data['card_name']
+            #Adjust the length of the card_name if needed.
+            if(len(temp_str) > 99):
+                temp_str = (temp_str[:100] + '...')
             #Find the matching card_name.
-            if(card_data['card_name'] == entry.text.strip()):
+            if(temp_str == entry.text.strip()):
                 #Get the a element that contains the information needed.
                 a_list = entry.find_all('a')
                 #Get the card_id from the link.
@@ -383,10 +388,8 @@ def get_card_id(url, card_data, page_num):
                 return card_data
         #If the card was not found, check the next page if available.
         if(card_data['checklist_link'] == ''):
-            #print(card_data['card_name'])
             page_num += 1
-            #print(page_num)
-            temp_url = url + 'rowNum=25&page=' + str(page_num)
+            temp_url = url + '&rowNum=25&page=' + str(page_num)
             card_data = get_card_id(temp_url, card_data, page_num)
         return card_data
     except IndexError as err:
