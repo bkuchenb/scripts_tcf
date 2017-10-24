@@ -751,6 +751,8 @@ page_links = get_page_links(soup)
 for x in range(page - 1, page_links['last_page_num']):
 # for x in range(page - 1, 1):
     print('Page', x + 1)
+    #Set the default currency.
+    set_currency()
     #Create a list to store card data.
     data_list = list()
 #function call---------------------------------------------------------------->
