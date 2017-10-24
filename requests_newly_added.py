@@ -364,11 +364,15 @@ def sql_update_inventory(card_data):
         #If the update fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(update.format(**card_data))
-def get_card_id(card_soup, card_data):
+def get_card_id(url, card_data, page_num):
     try:
+#function call---------------------------------------------------------------->
+        #Makek the soup.
+        card_soup = request_page(url)
         #Get all the card names that are displayed.
         li_list = card_soup.find_all('li', 'title')
         for entry in li_list:
+            #Find the matching card_name.
             if(card_data['card_name'] == entry.text.strip()):
                 #Get the a element that contains the information needed.
                 a_list = entry.find_all('a')
@@ -376,6 +380,17 @@ def get_card_id(card_soup, card_data):
                 temp_list = a_list[0]['href'].split('-')
                 card_data['card_id'] = temp_list[len(temp_list) - 1]
                 card_data['checklist_link'] = a_list[0]['href']
+        #If the card was not found, check the next page if available.
+        if(card_data['checklist_link'] == ''):
+            # print('Checklist page', str(page_num))
+            # #Find the next page link if available.
+            # temp_span = card_soup.find_all('span', 'next')
+# #debugging-------------------------------------------------------------------->
+            # print(len(temp_span), '--> <span class="next">')
+            # if(len(temp_span) > 0):
+            page_num += 1
+            temp_url = url + 'rowNum=25&page=' + str(page_num)
+            card_data = get_card_id(temp_url, card_data, page_num)
         return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
@@ -594,7 +609,8 @@ def get_tcf_storefront_data(soup, data_list):
                          'value_low': 0, 'value_high': 0,
                          'inventory_id': '', 'condition': '', 'quantity': '',
                          'min': 1, 'max': '', 'price': 0,
-                         'attribute_name': list(), 'print_run': 0
+                         'attribute_name': list(), 'print_run': 0,
+                         'checklist_link': ''
                          }
             print('Card#:', i + 1)
             #Get the a element that contains the information needed.
@@ -604,7 +620,6 @@ def get_tcf_storefront_data(soup, data_list):
             #Get the inventory_id from the link.
             temp_list = card_url.split('_')
             card_data['inventory_id'] = temp_list[len(temp_list) - 1]
-            #Get additional data from the scraped links.
 #function call---------------------------------------------------------------->
             try:
                 card_soup = request_page(card_url)
@@ -615,21 +630,17 @@ def get_tcf_storefront_data(soup, data_list):
             card_data = get_card_tcf_marketplace(card_soup, card_data)
             #Find the card_id
             temp_str = card_data['card_name'].replace(' ', '+')
-            #Format string for web address.
+            #Format temp_str for web address.
             temp_str = temp_str.replace('#', '%23')
             temp_str = temp_str.replace('/', '%2F')
             temp_list = card_data['card_name'].split(' ')
+            #Create a page number to ensure that the card_id is found.
+            page_num = 1
             url = ('https://www.beckett.com/search/?term='
                    + temp_str + '&year_start=' + temp_list[0])
+#function call---------------------------------------------------------------->
             #Get the card_id.
-#function call---------------------------------------------------------------->
-            try:
-                card_soup = request_page(url)
-            except requests.Timeout as err:
-                print('Something went wrong: {}'.format(err))
-                print(url)
-#function call---------------------------------------------------------------->
-            card_data = get_card_id(card_soup, card_data)
+            card_data = get_card_id(url, card_data, page_num)
             #Get more information from the checklist_link.
 #function call---------------------------------------------------------------->
             try:
