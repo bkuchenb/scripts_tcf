@@ -461,6 +461,19 @@ def get_card_id_url(card_soup, card_data):
 #debugging-------------------------------------------------------------------->
     #print(card_data)
     return card_data
+def get_card_price(card_soup, card_data):
+    #Get the div that contains the price data.
+    div_list = card_soup.find_all('div', 'price_to_container')
+    if(len(div_list) > 0):
+        temp_str = div_list[0].text
+        temp_list = temp_str.split('to')
+        if len(temp_list) > 0:
+            card_data['value_low'] = float(temp_list[0].replace('$', ''))
+        if len(temp_list) > 1:
+            card_data['value_high'] = float(temp_list[1].replace('$', ''))
+        else:
+            card_data['value_high'] = card_data['value_low']
+    return card_data
 def get_inventory_id_url(card_soup, card_data):
     #Get the image links.
     temp_img = card_soup.find_all(id='item_image_front')
@@ -573,18 +586,47 @@ def get_inventory_id_url(card_soup, card_data):
         exception_list.append(str(len(div_list)) + ' li elements were found.')
         exception_list.append(str(len(a_list)) + ' a elements were found '
         'in the li element.')
-def get_card_price(card_soup, card_data):
-    #Get the div that contains the price data.
-    div_list = card_soup.find_all('div', 'price_to_container')
-    if(len(div_list) > 0):
-        temp_str = div_list[0].text
-        temp_list = temp_str.split('to')
-        if len(temp_list) > 0:
-            card_data['value_low'] = float(temp_list[0].replace('$', ''))
-        if len(temp_list) > 1:
-            card_data['value_high'] = float(temp_list[1].replace('$', ''))
-        else:
-            card_data['value_high'] = card_data['value_low']
+def get_page_links(soup):
+    #Create a dictionary to store return values.
+    page_links = {}
+    try:
+        #Get the li element that holds the next page button.
+        li_list = soup.find_all('li', 'next')
+        #Get the a element that holds the next page link.
+        a_list = li_list[0].find_all('a')
+        page_links['next_page_link'] = a_list[0]['href']
+        #Get the li element that holds the last page button.
+        li_list2 = soup.find_all('li', 'last')
+        #Get the a element that holds the last page link.
+        a_list2 = li_list2[1].find_all('a')
+        page_links['last_page_link'] = a_list2[0]['href']
+        #Find the next and last page number.
+        temp_list = page_links['next_page_link'].split('=')
+        page_links['next_page_num'] = int(temp_list[len(temp_list) - 1])
+        temp_list = page_links['last_page_link'].split('=')
+        page_links['last_page_num'] = int(temp_list[len(temp_list) - 1])
+        return page_links
+    except IndexError as err:
+        print('Something went wrong: {}'.format(err))
+        exception_list.append(str(len(li_list)) + ' li elements with '
+        'className="next" were found.')
+        exception_list.append(str(len(a_list)) + ' a elements were found '
+        'in the first li element.')
+        exception_list.append(str(len(li_list2)) + ' li elements with '
+        'className="last" were found.')
+        exception_list.append(str(len(a_list2)) + ' a elements were found '
+        'in the first li element.')
+def get_player_name(card_soup, card_data):
+    class_name = 'pull-left paddingLeft10'
+    #Get the official player_name.
+    try:
+        div_list = card_soup.find_all('div', class_name)
+        temp_str = div_list[0].text.strip()
+        card_data['player_name'].append(temp_str)
+    except IndexError as err:
+        print('Something went wrong: {}'.format(err))
+        exception_list.append(str(len(div_list)) + ' div elements with '
+        'className="pull-left paddingLeft10" were found.')
     return card_data
 def get_tcf_storefront_data(soup, data_list):
     #Get all the card names that are displayed.
@@ -644,48 +686,6 @@ def get_tcf_storefront_data(soup, data_list):
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
         print(len(a_list), 'a elements were found in li element #:', i, '.')
-def get_page_links(soup):
-    #Create a dictionary to store return values.
-    page_links = {}
-    try:
-        #Get the li element that holds the next page button.
-        li_list = soup.find_all('li', 'next')
-        #Get the a element that holds the next page link.
-        a_list = li_list[0].find_all('a')
-        page_links['next_page_link'] = a_list[0]['href']
-        #Get the li element that holds the last page button.
-        li_list2 = soup.find_all('li', 'last')
-        #Get the a element that holds the last page link.
-        a_list2 = li_list2[1].find_all('a')
-        page_links['last_page_link'] = a_list2[0]['href']
-        #Find the next and last page number.
-        temp_list = page_links['next_page_link'].split('=')
-        page_links['next_page_num'] = int(temp_list[len(temp_list) - 1])
-        temp_list = page_links['last_page_link'].split('=')
-        page_links['last_page_num'] = int(temp_list[len(temp_list) - 1])
-        return page_links
-    except IndexError as err:
-        print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(li_list)) + ' li elements with '
-        'className="next" were found.')
-        exception_list.append(str(len(a_list)) + ' a elements were found '
-        'in the first li element.')
-        exception_list.append(str(len(li_list2)) + ' li elements with '
-        'className="last" were found.')
-        exception_list.append(str(len(a_list2)) + ' a elements were found '
-        'in the first li element.')
-def get_player_name(card_soup, card_data):
-    class_name = 'pull-left paddingLeft10'
-    #Get the official player_name.
-    try:
-        div_list = card_soup.find_all('div', class_name)
-        temp_str = div_list[0].text.strip()
-        card_data['player_name'].append(temp_str)
-    except IndexError as err:
-        print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(div_list)) + ' div elements with '
-        'className="pull-left paddingLeft10" were found.')
-    return card_data
 def request_page(url):
     try:
         #Get the page requested.
@@ -736,7 +736,7 @@ exception_list = list()
 # url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        # 'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
 #Override for first 10,000 items.
-page = 32
+page = 33
 #Go to the tcf marketplace page and search all items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?result_type=59&page=' + str(page))
