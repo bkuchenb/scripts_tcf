@@ -370,7 +370,7 @@ def get_card_id(url, card_data, page_num):
         #Makek the soup.
         card_soup = request_page(url)
         #Get all the card names that are displayed.
-        li_list = card_soup.find_all('li', 'title')
+        li_list = card_soup.find_all('li')
         for entry in li_list:
             #Find the matching card_name.
             if(card_data['card_name'] == entry.text.strip()):
@@ -380,15 +380,12 @@ def get_card_id(url, card_data, page_num):
                 temp_list = a_list[0]['href'].split('-')
                 card_data['card_id'] = temp_list[len(temp_list) - 1]
                 card_data['checklist_link'] = a_list[0]['href']
+                return card_data
         #If the card was not found, check the next page if available.
         if(card_data['checklist_link'] == ''):
-            # print('Checklist page', str(page_num))
-            # #Find the next page link if available.
-            # temp_span = card_soup.find_all('span', 'next')
-# #debugging-------------------------------------------------------------------->
-            # print(len(temp_span), '--> <span class="next">')
-            # if(len(temp_span) > 0):
+            #print(card_data['card_name'])
             page_num += 1
+            #print(page_num)
             temp_url = url + 'rowNum=25&page=' + str(page_num)
             card_data = get_card_id(temp_url, card_data, page_num)
         return card_data
@@ -747,15 +744,15 @@ exception_list = list()
 #Set the currency.
 set_currency()
 
-page = 29
-#Go to the tcf marketplace page and search newly added items.
-url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
-# #Override for first 10,000 items.
-# page = 7
+# page = 29
 # #Go to the tcf marketplace page and search newly added items.
 # url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       # 'search_new/?result_type=59&page=' + str(page))
+       # 'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
+#Override for first 10,000 items.
+page = 26
+#Go to the tcf marketplace page and search newly added items.
+url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
+       'search_new/?result_type=59&page=' + str(page))
 #Make the soup.
 #function call---------------------------------------------------------------->
 try:
