@@ -201,7 +201,7 @@ def sql_select_attribute(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_brand(card_data, index):
     select = ("SELECT brand_id "
@@ -212,7 +212,7 @@ def sql_select_brand(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_card(card_data):
     select = ("SELECT card_id "
@@ -223,7 +223,7 @@ def sql_select_card(card_data):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_card_attribute(card_data, index):
     select = ("SELECT * "
@@ -247,7 +247,7 @@ def sql_select_card_player(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_card_team(card_data, index):
     select = ("SELECT * "
@@ -259,7 +259,7 @@ def sql_select_card_team(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_category(card_data, index):
     select = ("SELECT category_id "
@@ -270,7 +270,7 @@ def sql_select_category(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_inventory(card_data):
     select = ("SELECT inventory_id "
@@ -281,7 +281,7 @@ def sql_select_inventory(card_data):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_manufacturer(card_data, index):
     select = ("SELECT manufacturer_id "
@@ -292,7 +292,7 @@ def sql_select_manufacturer(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_player(card_data, index):
     select = ("SELECT player_id "
@@ -303,7 +303,7 @@ def sql_select_player(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_set(card_data, index):
     select = ("SELECT tcf_set.set_id "
@@ -319,7 +319,7 @@ def sql_select_set(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_set_category(card_data, index):
     select = ("SELECT * "
@@ -331,7 +331,7 @@ def sql_select_set_category(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_select_set_id():
     select = ("SELECT set_id FROM tcf_set ORDER BY set_id DESC LIMIT 1")
@@ -349,7 +349,7 @@ def sql_select_team(card_data, index):
     cursor.execute(select.format(**card_data))
     result = cursor.fetchall()
 #debugging-------------------------------------------------------------------->
-    print(len(result), 'record(s) were found.')
+    #print(len(result), 'record(s) were found.')
     return result
 def sql_update_inventory(card_data):
     update = ("UPDATE tcf_inventory "
@@ -736,7 +736,7 @@ exception_list = list()
 # url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        # 'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
 #Override for first 10,000 items.
-page = 26
+page = 32
 #Go to the tcf marketplace page and search all items.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?result_type=59&page=' + str(page))
