@@ -367,27 +367,37 @@ def sql_update_inventory(card_data):
 def get_card_id(url, card_data, page_num):
     try:
 #function call---------------------------------------------------------------->
-        #Makek the soup.
+        #Make the soup.
         card_soup = request_page(url)
+        #Get all the a elements.
+        # a_list = card_soup.find_all('a')
+        # print(len(a_list))
+        # for entry in a_list:
+            # if(card_data['link_str'] in entry['href']):
+                # temp_list = entry['href'].split('-')
+                # card_data['card_id'] = temp_list[len(temp_list) - 1]
+                # card_data['card_id_url'] = entry['href']
         #Get all the card names that are displayed.
         li_list = card_soup.find_all('li')
         for entry in li_list:
-            #Save the card_name temporarily.
-            temp_str = card_data['card_name']
-            #Adjust the length of the card_name if needed.
-            if(len(temp_str) > 99):
-                temp_str = (temp_str[:100] + '...')
-            #Find the matching card_name.
-            if(temp_str == entry.text.strip()):
-                #Get the a element that contains the information needed.
-                a_list = entry.find_all('a')
+            a_list = entry.find_all('a')
+            # #Save the card_name temporarily.
+            # temp_str = card_data['card_name']
+            # #Adjust the length of the card_name if needed.
+            # if(len(temp_str) > 99):
+                # temp_str = (temp_str[:100] + '...')
+            # #Find the matching card_name.
+            # if(temp_str == entry.text.strip()):
+                # #Get the a element that contains the information needed.
+                # a_list = entry.find_all('a')
+            if(len(a_list) == 1 and card_data['link_str'] in a_list[0]['href']):
                 #Get the card_id from the link.
                 temp_list = a_list[0]['href'].split('-')
                 card_data['card_id'] = temp_list[len(temp_list) - 1]
                 card_data['card_id_url'] = a_list[0]['href']
                 return card_data
         #If the card was not found, check the next page if available.
-        if(card_data['card_id_url'] == ''):
+        if(card_data['card_id_url'] == '' and page_num < 5):
             page_num += 1
             temp_url = url + '&rowNum=25&page=' + str(page_num)
             card_data = get_card_id(temp_url, card_data, page_num)
@@ -657,6 +667,12 @@ def get_tcf_storefront_data(soup, data_list):
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
             card_data['inventory_id'] = temp_list[len(temp_list) - 1]
+            #Get the year, category, and card name in the link.
+            temp_list = inventory_id_url.split('/')
+            temp_str = temp_list[len(temp_list) - 1]
+            temp_list = inventory_id_url.split('_')
+            #Remove the inventory_id.
+            card_data['link_str'] = temp_list[0]
             #Get the inventory_id_url page.
 #function call---------------------------------------------------------------->
             card_soup = request_page(inventory_id_url)
@@ -735,11 +751,17 @@ exception_list = list()
 # #Go to the tcf marketplace page and search newly added items.
 # url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        # 'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
-#Override for first 10,000 items.
-page = 33
-#Go to the tcf marketplace page and search all items.
+# #Override for first 10,000 items.
+# page = 33
+# #Go to the tcf marketplace page and search all items.
+# url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
+       # 'search_new/?result_type=59&page=' + str(page))
+
+#Override for rookie cards.
+page = 1
+#Go to the tcf marketplace page and search all rookie cards.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       'search_new/?result_type=59&page=' + str(page))
+       'search_new/?attr=RC')
        
 #Get the first page.
 #function call---------------------------------------------------------------->
