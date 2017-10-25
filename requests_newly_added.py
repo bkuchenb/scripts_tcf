@@ -370,8 +370,10 @@ def get_card_id(url, card_data, page_num):
 #function call---------------------------------------------------------------->
         #Make the soup.
         card_soup = request_page(url)
+        print(card_data['card_name'])
         #Get the a element with the card_id.
-        temp_a = card_soup.find_all(href=re.compile(card_data['link_str']))
+        temp_a = card_soup.find_all('a', title=re.compile(card_data['card_name']))
+        print(len(temp_a))
         if(len(temp_a) == 1):
             #Save the link.
             card_data['card_id_url'] = temp_a[0]['href']
@@ -383,6 +385,7 @@ def get_card_id(url, card_data, page_num):
         elif(card_data['card_id_url'] == '' and page_num < 5):
             page_num += 1
             temp_url = url + '&rowNum=25&page=' + str(page_num)
+            print(url)
             card_data = get_card_id(temp_url, card_data, page_num)
             return card_data
     except IndexError as err:
