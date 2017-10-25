@@ -7,6 +7,7 @@ Created on Sat Oct  7 2017
 
 import MySQLdb
 import requests
+import re
 from bs4 import BeautifulSoup
 
 def sql_insert_brand(card_data, index):
@@ -369,39 +370,21 @@ def get_card_id(url, card_data, page_num):
 #function call---------------------------------------------------------------->
         #Make the soup.
         card_soup = request_page(url)
-        #Get all the a elements.
-        # a_list = card_soup.find_all('a')
-        # print(len(a_list))
-        # for entry in a_list:
-            # if(card_data['link_str'] in entry['href']):
-                # temp_list = entry['href'].split('-')
-                # card_data['card_id'] = temp_list[len(temp_list) - 1]
-                # card_data['card_id_url'] = entry['href']
-        #Get all the card names that are displayed.
-        li_list = card_soup.find_all('li')
-        for entry in li_list:
-            a_list = entry.find_all('a')
-            # #Save the card_name temporarily.
-            # temp_str = card_data['card_name']
-            # #Adjust the length of the card_name if needed.
-            # if(len(temp_str) > 99):
-                # temp_str = (temp_str[:100] + '...')
-            # #Find the matching card_name.
-            # if(temp_str == entry.text.strip()):
-                # #Get the a element that contains the information needed.
-                # a_list = entry.find_all('a')
-            if(len(a_list) == 1 and card_data['link_str'] in a_list[0]['href']):
-                #Get the card_id from the link.
-                temp_list = a_list[0]['href'].split('-')
-                card_data['card_id'] = temp_list[len(temp_list) - 1]
-                card_data['card_id_url'] = a_list[0]['href']
-                return card_data
+        #Get the a element with the card_id.
+        temp_a = card_soup.find_all(href=re.compile(card_data['link_str']))
+        if(len(temp_a) == 1):
+            #Save the link.
+            card_data['card_id_url'] = temp_a[0]['href']
+            #Get the card_id
+            temp_list = temp_a[0]['href'].split('-')
+            card_data['card_id'] = temp_list[len(temp_list) - 1]
+            return card_data
         #If the card was not found, check the next page if available.
-        if(card_data['card_id_url'] == '' and page_num < 5):
+        elif(card_data['card_id_url'] == '' and page_num < 5):
             page_num += 1
             temp_url = url + '&rowNum=25&page=' + str(page_num)
             card_data = get_card_id(temp_url, card_data, page_num)
-        return card_data
+            return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
@@ -670,9 +653,9 @@ def get_tcf_storefront_data(soup, data_list):
             #Get the year, category, and card name in the link.
             temp_list = inventory_id_url.split('/')
             temp_str = temp_list[len(temp_list) - 1]
-            temp_list = inventory_id_url.split('_')
-            #Remove the inventory_id.
-            card_data['link_str'] = temp_list[0]
+            temp_list = temp_str.split('_')
+            #Remove the inventory_id and add a slash after the year.
+            card_data['link_str'] = temp_list[0].replace('-', '/', 2)
             #Get the inventory_id_url page.
 #function call---------------------------------------------------------------->
             card_soup = request_page(inventory_id_url)
