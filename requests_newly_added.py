@@ -101,7 +101,7 @@ def sql_insert_inventory(card_data):
               "VALUES({inventory_id}, {card_id}, {condition!r}, "
               "{quantity}, {max}, {min}, {price})")
 #debugging-------------------------------------------------------------------->
-    #print(insert.format(**card_data))
+    print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -355,7 +355,7 @@ def sql_select_team(card_data, index):
 def sql_update_inventory(card_data):
     update = ("UPDATE tcf_inventory "
               "Set quantity = {quantity}, price = {price} "
-              "WHERE card_id = {card_id}")
+              "WHERE inventory_id = {inventory_id}")
 #debugging-------------------------------------------------------------------->
     #print(update.format(**card_data))
     try:
@@ -365,14 +365,118 @@ def sql_update_inventory(card_data):
         #If the update fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(update.format(**card_data))
+def add_card_data(card_data):
+    try:
+        #Check to see if there is more than 1 brand_id.
+        for index in range(0, len(card_data['brand_id'])):
+            #Check to see if the brand has already been added.
+            result = sql_select_brand(card_data, index)
+            #If the brand doesn't exist, insert it into tcf_brand.
+            if(len(result) == 0):
+                sql_insert_brand(card_data, index)
+                
+        #Check to see if there is more than 1 manufacturer_id.
+        for index in range(0, len(card_data['manufacturer_id'])):
+            #Check to see if the manufacturer has already been added.
+            result = sql_select_manufacturer(card_data, index)
+            #If the manufacturer doesn't exist, insert it.
+            if(len(result) == 0):
+                sql_insert_manufacturer(card_data, index)
+
+        #Check to see if there is more than 1 category_id.
+        for index in range(0, len(card_data['category_id'])):
+            #Check to see if the category has already been added.
+            result = sql_select_category(card_data, index)
+            #If the category doesn't exist, insert it into tcf_category.
+            if(len(result) == 0):
+                sql_insert_category(card_data, index)
+                        
+            #Check to see if the set has already been added.
+            result = sql_select_set(card_data, index)
+            #If the set doesn't exist, insert it into tcf_set.
+            if(len(result) == 0):
+                sql_insert_set(card_data)
+                #Get the set_id just created.
+                result = sql_select_set_id()
+                card_data['set_id'] = result
+            #If only 1 set was found update the card_data field.
+            elif(len(result) == 1):
+                card_data['set_id'] = result[0][0]
+            #If more than 1 set was found log an exception.
+            elif(len(result) > 1):
+                temp_str = ('More than 1 set: ' + card_data['set_name']
+                + ' was found.')
+                exception_list.append(temp_str)
+                
+            #Check to see if the set_category has already been added.
+            result = sql_select_set_category(card_data, index)
+            #If the set_category doesn't exist, insert it.
+            if(len(result) == 0):
+                sql_insert_set_category(card_data, index)
+        
+        #Check to see if the card has already been added to tcf_card.
+        result = sql_select_card(card_data)
+        if(len(result) == 0):
+            sql_insert_card(card_data)
+            
+        #Add the card to tcf_inventory.
+        sql_insert_inventory(card_data)
+            
+        #Check to see if there is more than 1 player_id.
+        for index in range(0, len(card_data['player_id'])):
+            #Check to see if the player has already been added.
+            result = sql_select_player(card_data, index)
+            #If the player doesn't exist, insert it into tcf_player.
+            if(len(result) == 0):
+                sql_insert_player(card_data, index)
+            #Check to see if the card_player has already been added.
+            result = sql_select_card_player(card_data, index)
+            #If the card_player doesn't exist, insert it into tcf_card_player.
+            if(len(result) == 0):
+                sql_insert_card_player(card_data, index)
+
+        #Check to see if there is more than 1 team_id.
+        for index in range(0, len(card_data['team_id'])):
+            #Check to see if the team has already been added.
+            result = sql_select_team(card_data, index)
+            #If the team doesn't exist, insert it into tcf_team.
+            if(len(result) == 0):
+                sql_insert_team(card_data, index)
+            #Check to see if the card_team has already been added.
+            result = sql_select_card_team(card_data, index)
+            #If the card_team doesn't exist, insert it into tcf_card_team.
+            if(len(result) == 0):
+                sql_insert_card_team(card_data, index)
+                
+        #Check to see if there is more than 1 attribute_name.
+        for index in range(0, len(card_data['attribute_name'])):
+            #Check to see if the attribute has already been added.
+            result = sql_select_attribute(card_data, index)
+            #If the attribute doesn't exist, log an exception.
+            if(len(result) == 0):
+                exception_list.append(card_data['attribute_name'][index])
+            else:
+                card_data['attribute_id'] = result[0][0]
+                #Check to see if the card_attribute has already been added.
+                result = sql_select_card_attribute(card_data, index)
+                #If the card_attribute doesn't exist, insert it.
+                if(len(result) == 0):
+                    sql_insert_card_attribute(card_data, index)
+    except IndexError as err:
+        print('Something went wrong: {}'.format(err))
 def get_card_id(url, card_data, page_num):
     try:
 #function call---------------------------------------------------------------->
         #Make the soup.
         card_soup = request_page(url)
-        print(card_data['card_name'])
+        #Create a string to search the href for a matching value.
+        temp_list = card_data['card_name'].split('#')
+        temp_str = temp_list[0].replace(' ', '/', 1)
+        temp_str = temp_str.replace(' ', '-') + '/'
+        temp_str += temp_str[1].replace(' ', '-')
+        print(temp_str)
         #Get the a element with the card_id.
-        temp_a = card_soup.find_all('a', title=re.compile(card_data['card_name']))
+        temp_a = card_soup.find_all(href=re.compile(temp_str))
         print(len(temp_a))
         if(len(temp_a) == 1):
             #Save the link.
@@ -390,8 +494,6 @@ def get_card_id(url, card_data, page_num):
             return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        print(len(li_list), 'li elements with className="title" were found.')
-        print(len(a_list), 'a elements were found.')
 def get_card_id_url(card_soup, card_data):
     #Get the list that contains the data.
     class_name = 'similar-item similar-item-new'
@@ -624,7 +726,7 @@ def get_player_name(card_soup, card_data):
         exception_list.append(str(len(div_list)) + ' div elements with '
         'className="pull-left paddingLeft10" were found.')
     return card_data
-def get_tcf_storefront_data(soup, data_list):
+def get_tcf_dealer_home_search(soup):
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
@@ -648,42 +750,50 @@ def get_tcf_storefront_data(soup, data_list):
             print('Card#:', i + 1)
             #Get the a element that contains the inventory_id_url.
             a_list = li_list[i].find_all('a')
+            #Save the link.
             inventory_id_url = a_list[0]['href']
+            #Save the unformatted card_name.
             card_data['card_name'] = a_list[0].text
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
             card_data['inventory_id'] = temp_list[len(temp_list) - 1]
-            #Get the year, category, and card name in the link.
-            temp_list = inventory_id_url.split('/')
-            temp_str = temp_list[len(temp_list) - 1]
-            temp_list = temp_str.split('_')
-            #Remove the inventory_id and add a slash after the year.
-            card_data['link_str'] = temp_list[0].replace('-', '/', 2)
             #Get the inventory_id_url page.
 #function call---------------------------------------------------------------->
             card_soup = request_page(inventory_id_url)
 #function call---------------------------------------------------------------->
             card_data = get_inventory_id_url(card_soup, card_data)
-            #Find the card_id
-            temp_str = card_data['card_name'].replace(' ', '+')
-            #Format temp_str for web address.
-            temp_str = temp_str.replace('#', '%23')
-            temp_str = temp_str.replace('/', '%2F')
-            temp_list = card_data['card_name'].split(' ')
-            #Create a page number to ensure that the card_id is found.
-            page_num = 1
-            url = ('https://www.beckett.com/search/?term='
-                   + temp_str + '&year_start=' + temp_list[0])
+            #Check to see if the card has been added to tcf_inventory.
+            result = sql_select_inventory(card_data)
+            #If the inventory_id is found, update the quantity and price.
+            if len(result) == 1:
+                sql_update_inventory(card_data)
+            #If the card is not found, get the card_id.
+            elif len(result) == 0:
+                #Create a link to search for the page that contains the card_id.
+                temp_str = card_data['card_name'].replace(' ', '+')
+                #Format temp_str for web address.
+                temp_str = temp_str.replace('#', '%23')
+                temp_str = temp_str.replace('/', '%2F')
+                temp_list = card_data['card_name'].split(' ')
+                #Create a page number to ensure that the card_id is found.
+                page_num = 1
+                url = ('https://www.beckett.com/search/?term='
+                       + temp_str + '&year_start=' + temp_list[0])
 #function call---------------------------------------------------------------->
-            #Get the card_id.
-            card_data = get_card_id(url, card_data, page_num)
-            #Get more information from the card_id_url.
+                #Get the card_id.
+                card_data = get_card_id(url, card_data, page_num)
+                #Get more information from the card_id_url.
 #function call---------------------------------------------------------------->
-            card_soup = request_page(card_data['card_id_url'])
+                card_soup = request_page(card_data['card_id_url'])
 #function call---------------------------------------------------------------->
-            card_data = get_card_id_url(card_soup, card_data)      
-            data_list.append(card_data)
-        return data_list
+                card_data = get_card_id_url(card_soup, card_data)
+                #Add the card_data to the appropriate table.
+#function call---------------------------------------------------------------->
+                add_card_data(card_data)
+            elif len(result) > 1:
+                temp_str = 'More than one record was found for inventory_id: '
+                temp_str += card_data['inventory_id'] + '.'
+                print(temp_str)
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
@@ -761,120 +871,12 @@ for x in range(page - 1, page_links['last_page_num']):
     print('Page', x + 1)
     #Set the default currency.
     set_currency()
-    #Create a list to store card data.
-    data_list = list()
 #function call---------------------------------------------------------------->
-    data_list = get_tcf_storefront_data(soup, data_list)
-    #Create a counter to track which card is being updated.
-    counter = 1
-    #Add the cards to the inceff database.
-    for row in data_list:
-        print('SQL for card:', counter)
-        
-        #Check to see if there is more than 1 brand_id.
-        for index in range(0, len(row['brand_id'])):
-            #Check to see if the brand has already been added.
-            result = sql_select_brand(row, index)
-            #If the brand doesn't exist, insert it into tcf_brand.
-            if(len(result) == 0):
-                sql_insert_brand(row, index)
-                
-        #Check to see if there is more than 1 manufacturer_id.
-        for index in range(0, len(row['manufacturer_id'])):
-            #Check to see if the manufacturer has already been added.
-            result = sql_select_manufacturer(row, index)
-            #If the manufacturer doesn't exist, insert it.
-            if(len(result) == 0):
-                sql_insert_manufacturer(row, index)
-        
-        #Check to see if there is more than 1 category_id.
-        for index in range(0, len(row['category_id'])):
-            #Check to see if the category has already been added.
-            result = sql_select_category(row, index)
-            #If the category doesn't exist, insert it into tcf_category.
-            if(len(result) == 0):
-                sql_insert_category(row, index)
-            #Check to see if the set has already been added.
-            result = sql_select_set(row, index)
-            #If the set doesn't exist, insert it into tcf_set.
-            if(len(result) == 0):
-                sql_insert_set(row)
-                #Get the set_id just created.
-                result = sql_select_set_id()
-                row['set_id'] = result
-            #If only 1 set was found update the card_data field.
-            elif(len(result) == 1):
-                row['set_id'] = result[0][0]
-            #If more than 1 set was found log an exception.
-            elif(len(result) > 1):
-                temp_str = ('More than 1 set: ' + row['set_name']
-                + ' was found.')
-                exception_list.append(temp_str)
-            #Check to see if the set_category has already been added.
-            result = sql_select_set_category(row, index)
-            #If the set_category doesn't exist, insert it.
-            if(len(result) == 0):
-                sql_insert_set_category(row, index)
-        #Check to see if the card has already been added to tcf_card.
-        result = sql_select_card(row)
-        if(len(result) == 0):
-            sql_insert_card(row)
-        #Check to see if the card has already been added to tcf_inventory.
-        result = sql_select_inventory(row)
-        if(len(result) == 0):
-            sql_insert_inventory(row)
-        #If the card has been added, update the quantity.
-        else:
-            sql_update_inventory(row)
-            
-        #Check to see if there is more than 1 player_id.
-        for index in range(0, len(row['player_id'])):
-            #Check to see if the player has already been added.
-            result = sql_select_player(row, index)
-            #If the player doesn't exist, insert it into tcf_player.
-            if(len(result) == 0):
-                sql_insert_player(row, index)
-            #Check to see if the card_player has already been added.
-            result = sql_select_card_player(row, index)
-            #If the card_player doesn't exist, insert it into tcf_card_player.
-            if(len(result) == 0):
-                sql_insert_card_player(row, index)
-        
-        #Check to see if there is more than 1 team_id.
-        for index in range(0, len(row['team_id'])):
-            #Check to see if the team has already been added.
-            result = sql_select_team(row, index)
-            #If the team doesn't exist, insert it into tcf_team.
-            if(len(result) == 0):
-                sql_insert_team(row, index)
-            #Check to see if the card_team has already been added.
-            result = sql_select_card_team(row, index)
-            #If the card_team doesn't exist, insert it into tcf_card_team.
-            if(len(result) == 0):
-                sql_insert_card_team(row, index)
-                
-        #Check to see if there is more than 1 attribute_name.
-        for index in range(0, len(row['attribute_name'])):
-            #Check to see if the attribute has already been added.
-            result = sql_select_attribute(row, index)
-            #If the attribute doesn't exist, log an exception.
-            if(len(result) == 0):
-                exception_list.append(row['attribute_name'][index])
-            else:
-                row['attribute_id'] = result[0][0]
-                #Check to see if the card_attribute has already been added.
-                result = sql_select_card_attribute(row, index)
-                #If the card_attribute doesn't exist, insert it.
-                if(len(result) == 0):
-                    sql_insert_card_attribute(row, index)
-        counter += 1
+    get_tcf_dealer_home_search(soup)
     if not(x == page_links['last_page_num'] - 1):
 #function call---------------------------------------------------------------->
-        try:
-            soup = request_page(page_links['next_page_link'])
-        except requests.Timeout as err:
-            print('Something went wrong: {}'.format(err))
-            print(page_links['next_page_link'])
+        soup = request_page(page_links['next_page_link'])
+        print(page_links['next_page_link'])
 #function call---------------------------------------------------------------->
         page_links = get_page_links(soup)
         
