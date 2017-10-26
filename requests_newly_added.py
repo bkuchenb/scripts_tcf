@@ -101,7 +101,7 @@ def sql_insert_inventory(card_data):
               "VALUES({inventory_id}, {card_id}, {condition!r}, "
               "{quantity}, {max}, {min}, {price})")
 #debugging-------------------------------------------------------------------->
-    print(insert.format(**card_data))
+    #print(insert.format(**card_data))
     try:
         cursor.execute(insert.format(**card_data))
         cnx.commit()
@@ -773,7 +773,8 @@ def get_tcf_dealer_home_search(soup):
             if len(result) == 1:
                 sql_update_inventory(card_data)
             #If the card is not found, get the card_id.
-            if len(result) >= 0:
+            if len(result) >= 0:#Override for adding items with known attributes.
+            # elif len(result) == 0:
                 #Create a link to search for the page that contains the card_id.
                 temp_str = card_data['card_name'].replace(' ', '+')
                 #Format temp_str for web address.
