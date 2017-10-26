@@ -470,11 +470,16 @@ def get_card_id(url, card_data, page_num):
         #Make the soup.
         card_soup = request_page(url)
         #Create a string to search the href for a matching value.
-        temp_list = card_data['card_name'].split('#')
-        temp_str = temp_list[0].replace(' ', '/', 1)
+        temp_str = card_data['card_name'].lower()
+        temp_list = temp_str.split('#')
+        #Strip the whitespace from the year and set_name.
+        temp_str = temp_list[0].strip()
+        #Replace the space between the year and set_name with #.
+        temp_str = temp_str.replace(' ', '/', 1)
+        #Replace any spaces in the set_name with dashes. Add a slash at the end.
         temp_str = temp_str.replace(' ', '-') + '/'
-        temp_str += temp_str[1].replace(' ', '-')
-        print(temp_str)
+        #Replace any spaces in the card_number and card_name with dashes.
+        temp_str += temp_list[1].replace(' ', '-')
         #Get the a element with the card_id.
         temp_a = card_soup.find_all(href=re.compile(temp_str))
         print(len(temp_a))
@@ -768,7 +773,7 @@ def get_tcf_dealer_home_search(soup):
             if len(result) == 1:
                 sql_update_inventory(card_data)
             #If the card is not found, get the card_id.
-            elif len(result) == 0:
+            if len(result) >= 0:
                 #Create a link to search for the page that contains the card_id.
                 temp_str = card_data['card_name'].replace(' ', '+')
                 #Format temp_str for web address.
@@ -782,6 +787,7 @@ def get_tcf_dealer_home_search(soup):
 #function call---------------------------------------------------------------->
                 #Get the card_id.
                 card_data = get_card_id(url, card_data, page_num)
+                print(card_data['card_id'])
                 #Get more information from the card_id_url.
 #function call---------------------------------------------------------------->
                 card_soup = request_page(card_data['card_id_url'])
