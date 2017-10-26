@@ -478,11 +478,16 @@ def get_card_id(url, card_data, page_num):
         temp_str = temp_str.replace(' ', '/', 1)
         #Replace any spaces in the set_name with dashes. Add a slash at the end.
         temp_str = temp_str.replace(' ', '-') + '/'
-        #Replace any spaces in the card_number and card_name with dashes.
-        temp_str += temp_list[1].replace(' ', '-')
+        #Replace any slashes in the card_number and card_name with dashes.
+        temp_str += temp_list[1].replace('/', '')
+        #Replace any spacces, apostrophies, periods.
+        temp_str = temp_str.replace(' ', '-')
+        temp_str = temp_str.replace('\'', '')
+        temp_str = temp_str.replace('.', '')
+#debugging-------------------------------------------------------------------->
+        #print(temp_str)
         #Get the a element with the card_id.
         temp_a = card_soup.find_all(href=re.compile(temp_str))
-        print(len(temp_a))
         if(len(temp_a) == 1):
             #Save the link.
             card_data['card_id_url'] = temp_a[0]['href']
@@ -788,7 +793,6 @@ def get_tcf_dealer_home_search(soup):
 #function call---------------------------------------------------------------->
                 #Get the card_id.
                 card_data = get_card_id(url, card_data, page_num)
-                print(card_data['card_id'])
                 #Get more information from the card_id_url.
 #function call---------------------------------------------------------------->
                 card_soup = request_page(card_data['card_id_url'])
@@ -861,10 +865,10 @@ exception_list = list()
        # 'search_new/?result_type=59&page=' + str(page))
 
 #Override for rookie cards.
-page = 1
+page = 2
 #Go to the tcf marketplace page and search all rookie cards.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       'search_new/?attr=RC')
+       'search_new/?attr=RC&page=' + str(page))
        
 #Get the first page.
 #function call---------------------------------------------------------------->
@@ -883,7 +887,6 @@ for x in range(page - 1, page_links['last_page_num']):
     if not(x == page_links['last_page_num'] - 1):
 #function call---------------------------------------------------------------->
         soup = request_page(page_links['next_page_link'])
-        print(page_links['next_page_link'])
 #function call---------------------------------------------------------------->
         page_links = get_page_links(soup)
         
