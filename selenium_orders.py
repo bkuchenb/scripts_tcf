@@ -8,10 +8,7 @@ Created on Sat Jul  2 18:29:02 2016
 #Import selenium which will control the web browser.
 from selenium import webdriver
 #Import modules to force the browser to wait.
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 #Import datetime to calculate different days.
 import datetime
@@ -306,25 +303,6 @@ for x in range(0, len(orderList)):
                                      card[6], card[7], card[8], card[9],
                                      orderList[x][0])
                 cursor.execute(query)
-#                #Search the tcf_sets table for the set.
-#                query2 = ('SELECT set_id FROM tcf_sets '
-#                + 'WHERE set_year = "{0}" AND category = "{1}" '
-#                + 'AND set_name = "{2}"')
-#                query2 = query2.format(card[2], card[1], card[3])
-#                cursor.execute(query2)
-#                cursor.fetchall()
-#                #If the set was found, print a message.
-#                temp_str = card[1] + ' ' + card[2] + ' ' + card[3]
-#                if(cursor.rowcount == 1):
-#                    print(temp_str, 'was found in tcf_sets.')
-#                else:
-#                    #If the set wasn't found, add it to the table.
-#                    query3 = ('INSERT INTO tcf_sets(set_year, category, '
-#                    'set_name) VALUES("{0}", "{1}", "{2}")')
-#                    query3 = query3.format(card[2], card[1], card[3])
-#                    cursor.execute(query3)
-#                    cnx.commit()
-#                    print(temp_str, 'was added to tcf_sets.')
             except MySQLdb.Error as err:
                 print("Something went wrong: {}".format(err))
                 for frame in traceback.extract_tb(sys.exc_info()[2]):
