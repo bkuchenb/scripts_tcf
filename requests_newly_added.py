@@ -485,6 +485,7 @@ def get_card_id(url, card_data, page_num):
         temp_str = temp_str.replace('\'', '')
         temp_str = temp_str.replace('.', '')
         temp_str = temp_str.replace(',', '')
+        temp_str = temp_str.replace('+...~', '')
 #debugging-------------------------------------------------------------------->
         #print(temp_str)
         #Get the a element with the card_id.
@@ -866,7 +867,7 @@ exception_list = list()
        # 'search_new/?result_type=59&page=' + str(page))
 
 #Override for rookie cards.
-page = 3
+page = 18
 #Go to the tcf marketplace page and search all rookie cards.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?attr=RC&page=' + str(page))
