@@ -466,6 +466,9 @@ def add_card_data(card_data):
         print('Something went wrong: {}'.format(err))
 def get_card_id(url, card_data, page_num):
     try:
+#debugging-------------------------------------------------------------------->
+        if debugging:
+            print('debugging\n' + url + '\ndebugging\n')
 #function call---------------------------------------------------------------->
         #Make the soup.
         card_soup = request_page(url)
@@ -488,8 +491,11 @@ def get_card_id(url, card_data, page_num):
         temp_str = temp_str.replace('.', '')
         temp_str = temp_str.replace(',', '')
         temp_str = temp_str.replace(';', '')
+        temp_str = temp_str.replace('(', '')
+        temp_str = temp_str.replace(')', '')
 #debugging-------------------------------------------------------------------->
-        #print(temp_str)
+        if debugging:
+            print('debugging\n' + temp_str + '\ndebugging\n')
         #Get the a element with the card_id.
         temp_a = card_soup.find_all(href=re.compile(temp_str))
         if(len(temp_a) == 1):
@@ -750,9 +756,7 @@ def get_tcf_dealer_home_search(soup):
     try:
         li_list = soup.find_all('li', 'title')
         #For each card, get the card_name, inventory_id_url, and inventory_id.
-        # for i in range(0, len(li_list)):
-#debugging-------------------------------------------------------------------->        
-        for i in range(0, len(li_list)):
+        for i in range(card_start, card_end):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
                          'category_id': list(), 'category_name': list(),
@@ -775,10 +779,11 @@ def get_tcf_dealer_home_search(soup):
             inventory_id_url = a_list[0]['href']
             #Save the unformatted card_name.
             temp_str = a_list[0].text.strip()
-            #Replace ...~ in any card_names to prevent errors.
+            #Replace special character sequences that produce errors.
             temp_str = temp_str.replace('...~', '')
-            #Replace any double spaces.
             temp_str = temp_str.replace('  ', ' ')
+            temp_str = temp_str.replace('(', '')
+            temp_str = temp_str.replace(')', '')
             card_data['card_name'] = temp_str
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
@@ -886,8 +891,12 @@ exception_list = list()
 # url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        # 'search_new/?result_type=59&page=' + str(page))
 
-#Override for rookie cards.
-page = 34
+#Override variables.
+page = 35
+card_start = 0
+card_end = 100
+debugging = False
+#debugging = True
 #Go to the tcf marketplace page and search all rookie cards.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?attr=RC&page=' + str(page))
