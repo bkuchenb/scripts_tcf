@@ -599,8 +599,13 @@ def get_inventory_id_url(card_soup, card_data):
                 #Remove the title and discount rate.
                 temp_str = temp_str.replace('Price:', '').strip()
                 temp_str = temp_str.replace('xx% off Beckett Value', '').strip()
-                card_data['price'] = float(temp_str.replace('$', ''))
-                break
+                #Check to see if a Canadian price is present.
+                if 'CAD' in temp_str:
+                    temp_list = temp_str.split('CAD')
+                    card_data['price'] = float(temp_list[0].replace('$', ''))
+                else:
+                    card_data['price'] = float(temp_str.replace('$', ''))
+                    break
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
         exception_list.append(str(len(div_list)) + ' div elements with '
@@ -876,7 +881,7 @@ exception_list = list()
        # 'search_new/?result_type=59&page=' + str(page))
 
 #Override for rookie cards.
-page = 27
+page = 32
 #Go to the tcf marketplace page and search all rookie cards.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?attr=RC&page=' + str(page))
