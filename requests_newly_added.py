@@ -485,7 +485,6 @@ def get_card_id(url, card_data, page_num):
         temp_str = temp_str.replace('\'', '')
         temp_str = temp_str.replace('.', '')
         temp_str = temp_str.replace(',', '')
-        temp_str = temp_str.replace('+...~', '')
 #debugging-------------------------------------------------------------------->
         #print(temp_str)
         #Get the a element with the card_id.
@@ -765,7 +764,7 @@ def get_tcf_dealer_home_search(soup):
             #Save the link.
             inventory_id_url = a_list[0]['href']
             #Save the unformatted card_name.
-            card_data['card_name'] = a_list[0].text
+            card_data['card_name'] = a_list[0].text.replace('...~', '')
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
             card_data['inventory_id'] = temp_list[len(temp_list) - 1]
