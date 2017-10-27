@@ -493,6 +493,8 @@ def get_card_id(url, card_data, page_num):
         temp_str = temp_str.replace(';', '')
         temp_str = temp_str.replace('(', '')
         temp_str = temp_str.replace(')', '')
+        temp_str = temp_str.replace('\\', '')
+        temp_str = temp_str.replace('"', '')
 #debugging-------------------------------------------------------------------->
         if debugging:
             print('debugging\n' + temp_str + '\ndebugging\n')
@@ -784,6 +786,7 @@ def get_tcf_dealer_home_search(soup):
             temp_str = temp_str.replace('  ', ' ')
             temp_str = temp_str.replace('(', '')
             temp_str = temp_str.replace(')', '')
+            temp_str = temp_str.replace('\\', '')
             card_data['card_name'] = temp_str
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
@@ -813,6 +816,7 @@ def get_tcf_dealer_home_search(soup):
                 temp_str = temp_str.replace('*', '%2A')
                 temp_str = temp_str.replace(';', '%3B')
                 temp_str = temp_str.replace(',', '%2C')
+                temp_str = temp_str.replace('"', '')
                 #Create a page number to ensure that the card_id is found.
                 page_num = 1
                 url = ('https://www.beckett.com/search/?term='
@@ -892,7 +896,7 @@ exception_list = list()
        # 'search_new/?result_type=59&page=' + str(page))
 
 #Override variables.
-page = 35
+page = 39
 card_start = 0
 card_end = 100
 debugging = False
