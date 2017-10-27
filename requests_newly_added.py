@@ -480,14 +480,14 @@ def get_card_id(url, card_data, page_num):
         temp_str = temp_str.replace(' ', '-') + '/'
         #Replace any slashes in the card_number and card_name.
         temp_str += temp_list[1].replace('/', '')
-        #Replace any spacces, apostrophies, periods, commas, asterisk.
+        #Replace certain special charcters.
         temp_str = temp_str.replace(' ', '-')
         temp_str = temp_str.replace('\'', '')
         temp_str = temp_str.replace('.', '')
         temp_str = temp_str.replace(',', '')
-        temp_str = temp_str.replace('**', '')
+        temp_str = temp_str.replace(';', '')
 #debugging-------------------------------------------------------------------->
-        print(temp_str)
+        #print(temp_str)
         #Get the a element with the card_id.
         temp_a = card_soup.find_all(href=re.compile(temp_str))
         if(len(temp_a) == 1):
@@ -750,7 +750,7 @@ def get_tcf_dealer_home_search(soup):
         #For each card, get the card_name, inventory_id_url, and inventory_id.
         # for i in range(0, len(li_list)):
 #debugging-------------------------------------------------------------------->        
-        for i in range(46, len(li_list)):
+        for i in range(67, len(li_list)):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
                          'category_id': list(), 'category_name': list(),
@@ -804,6 +804,8 @@ def get_tcf_dealer_home_search(soup):
                 temp_str = temp_str.replace('#', '%23')
                 temp_str = temp_str.replace('/', '%2F')
                 temp_str = temp_str.replace('*', '%2A')
+                temp_str = temp_str.replace(';', '%3B')
+                temp_str = temp_str.replace(',', '%2C')
                 #Create a page number to ensure that the card_id is found.
                 page_num = 1
                 url = ('https://www.beckett.com/search/?term='
