@@ -474,11 +474,11 @@ def get_card_id(url, card_data, page_num):
         temp_list = temp_str.split('#')
         #Strip the whitespace from the year and set_name.
         temp_str = temp_list[0].strip()
-        #Replace the space between the year and set_name with #.
+        #Replace the space between the year and set_name with /.
         temp_str = temp_str.replace(' ', '/', 1)
         #Replace any spaces in the set_name with dashes. Add a slash at the end.
         temp_str = temp_str.replace(' ', '-') + '/'
-        #Replace any slashes in the card_number and card_name with dashes.
+        #Replace any slashes in the card_number and card_name.
         temp_str += temp_list[1].replace('/', '')
         #Replace any spacces, apostrophies, periods, commas.
         temp_str = temp_str.replace(' ', '-')
@@ -742,6 +742,8 @@ def get_tcf_dealer_home_search(soup):
     try:
         li_list = soup.find_all('li', 'title')
         #For each card, get the card_name, inventory_id_url, and inventory_id.
+        # for i in range(0, len(li_list)):
+#debugging-------------------------------------------------------------------->        
         for i in range(0, len(li_list)):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
@@ -764,7 +766,12 @@ def get_tcf_dealer_home_search(soup):
             #Save the link.
             inventory_id_url = a_list[0]['href']
             #Save the unformatted card_name.
-            card_data['card_name'] = a_list[0].text.replace('...~', '')
+            temp_str = a_list[0].text.strip()
+            #Replace ...~ in any card_names to prevent errors.
+            temp_str = temp_str.replace('...~', '')
+            #Replace any double spaces.
+            temp_str = temp_str.replace('  ', ' ')
+            card_data['card_name'] = temp_str
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
             card_data['inventory_id'] = temp_list[len(temp_list) - 1]
@@ -782,15 +789,18 @@ def get_tcf_dealer_home_search(soup):
             if len(result) >= 0:#Override for adding items with known attributes.
             # elif len(result) == 0:
                 #Create a link to search for the page that contains the card_id.
-                temp_str = card_data['card_name'].replace(' ', '+')
+                #Get the year from the card_name.
+                temp_list = card_data['card_name'].split(' ')
+                set_year = temp_list[0]
+                #Replace any single spaces with a plus sign.
+                temp_str = temp_str.replace(' ', '+')
                 #Format temp_str for web address.
                 temp_str = temp_str.replace('#', '%23')
                 temp_str = temp_str.replace('/', '%2F')
-                temp_list = card_data['card_name'].split(' ')
                 #Create a page number to ensure that the card_id is found.
                 page_num = 1
                 url = ('https://www.beckett.com/search/?term='
-                       + temp_str + '&year_start=' + temp_list[0])
+                       + temp_str + '&year_start=' + set_year)
 #function call---------------------------------------------------------------->
                 #Get the card_id.
                 card_data = get_card_id(url, card_data, page_num)
@@ -866,7 +876,7 @@ exception_list = list()
        # 'search_new/?result_type=59&page=' + str(page))
 
 #Override for rookie cards.
-page = 18
+page = 27
 #Go to the tcf marketplace page and search all rookie cards.
 url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
        'search_new/?attr=RC&page=' + str(page))
