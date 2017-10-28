@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 def sql_insert_brand(card_data, index):
 #Add the item if the number of ids and names matches.
     if(len(card_data['brand_id']) != len(card_data['brand_name'])):
-        exception_list.append('The number of ids and names doesn\'t match.')
+        print("The number of ids and names doesn't match.")
         return
     insert = ("INSERT INTO tcf_brand(brand_id, brand_name) "
               "VALUES({brand_id[" + str(index) + "]}, "
@@ -112,7 +112,7 @@ def sql_insert_inventory(card_data):
 def sql_insert_manufacturer(card_data, index):
     #Add the item if the number of ids and names matches.
     if(len(card_data['manufacturer_id']) != len(card_data['manufacturer_name'])):
-        exception_list.append('The number of ids and names doesn\'t match.')
+        print("The number of ids and names doesn't match.")
         return
     insert = ("INSERT INTO tcf_manufacturer"
               "(manufacturer_id, manufacturer_name) "
@@ -130,7 +130,7 @@ def sql_insert_manufacturer(card_data, index):
 def sql_insert_player(card_data, index):
     #Add the item if the number of ids and names matches.
     if(len(card_data['player_id']) != len(card_data['player_name'])):
-        exception_list.append('The number of ids and names doesn\'t match.')
+        print("The number of ids and names doesn't match.")
         return
     insert = ("INSERT INTO tcf_player(player_id, player_name) "
               "VALUES({player_id[" + str(index) + "]}, "
@@ -148,11 +148,11 @@ def sql_insert_set(card_data):
     #Add the set to tcf_set if there is only one manufacturer and one brand.
     if(len(card_data['manufacturer_id']) > 1
        or len(card_data['brand_id']) > 1):
-        exception_list.append('There is more than 1 manufacturer or brand id.')
+        print('There is more than 1 manufacturer or brand id.')
         return
     insert = ("INSERT INTO tcf_set"
-              "(set_year, set_name, manufacturer_id, brand_id) "
-              "VALUES({set_year!r}, {set_name!r}, "
+              "(set_id, set_year, set_name, manufacturer_id, brand_id) "
+              "VALUES({set_id}, {set_year!r}, {set_name!r}, "
               "{manufacturer_id[0]}, {brand_id[0]})")
 #debugging-------------------------------------------------------------------->
     #print(insert.format(**card_data))
@@ -179,7 +179,7 @@ def sql_insert_set_category(card_data, index):
 def sql_insert_team(card_data, index):
     #Add the item if the number of ids and names matches.
     if(len(card_data['team_id']) != len(card_data['team_name'])):
-        exception_list.append('The number of ids and names doesn\'t match.')
+        print("The number of ids and names doesn't match.")
         return
     insert = ("INSERT INTO tcf_team(team_id, team_name) "
               "VALUES({team_id[" + str(index) + "]}, "
@@ -396,17 +396,10 @@ def add_card_data(card_data):
             #If the set doesn't exist, insert it into tcf_set.
             if(len(result) == 0):
                 sql_insert_set(card_data)
-                #Get the set_id just created.
-                result = sql_select_set_id()
-                card_data['set_id'] = result
-            #If only 1 set was found update the card_data field.
-            elif(len(result) == 1):
-                card_data['set_id'] = result[0][0]
-            #If more than 1 set was found log an exception.
+            #If more than 1 set was found there is a problem.
             elif(len(result) > 1):
-                temp_str = ('More than 1 set: ' + card_data['set_name']
-                + ' was found.')
-                exception_list.append(temp_str)
+                print('More than 1 set:', card_data['set_name'],
+                      'was found.')
                 
             #Check to see if the set_category has already been added.
             result = sql_select_set_category(card_data, index)
@@ -417,10 +410,14 @@ def add_card_data(card_data):
         #Check to see if the card has already been added to tcf_card.
         result = sql_select_card(card_data)
         if(len(result) == 0):
+            #If the card_id doesn't exist, insert it.
             sql_insert_card(card_data)
             
-        #Add the card to tcf_inventory.
-        sql_insert_inventory(card_data)
+        #Check to see if the card has already been added to tcf_inventory.
+        result = sql_select_inventory(card_data)
+        if(len(result) == 0):
+        #If the inventory_id doesn't exist, insert it.
+            sql_insert_inventory(card_data)
             
         #Check to see if there is more than 1 player_id.
         for index in range(0, len(card_data['player_id'])):
@@ -454,7 +451,7 @@ def add_card_data(card_data):
             result = sql_select_attribute(card_data, index)
             #If the attribute doesn't exist, log an exception.
             if(len(result) == 0):
-                exception_list.append(card_data['attribute_name'][index])
+                print(card_data['attribute_name'][index])
             else:
                 card_data['attribute_id'] = result[0][0]
                 #Check to see if the card_attribute has already been added.
@@ -466,58 +463,57 @@ def add_card_data(card_data):
         print('Something went wrong: {}'.format(err))
 def get_card_id(url, card_data, page_num):
     try:
-#debugging-------------------------------------------------------------------->
-        if debugging:
-            print('debugging\n' + url + '\ndebugging\n')
-#function call---------------------------------------------------------------->
         #Make the soup.
-        card_soup = request_page(url)
-        #Create a string to search the href for a matching value.
-        temp_str = card_data['card_name'].lower()
-        temp_list = temp_str.split('#')
-        #Strip the whitespace from the year and set_name.
-        temp_str = temp_list[0].strip()
-        #Replace any slashes in the set_name,
-        temp_str = temp_str.replace('/', '')
-        #Replace the space between the year and set_name with /.
-        temp_str = temp_str.replace(' ', '/', 1)
-        #Replace any spaces in the set_name with dashes. Add a slash at the end.
-        temp_str = temp_str.replace(' ', '-') + '/'
-        #Replace any slashes in the card_number and card_name.
-        temp_str += temp_list[1].replace('/', '')
-        #Replace certain special charcters.
-        temp_str = temp_str.replace(' ', '-')
-        temp_str = temp_str.replace('\'', '')
-        temp_str = temp_str.replace('.', '')
-        temp_str = temp_str.replace(',', '')
-        temp_str = temp_str.replace(';', '')
-        temp_str = temp_str.replace('(', '')
-        temp_str = temp_str.replace(')', '')
-        temp_str = temp_str.replace('\\', '')
-        temp_str = temp_str.replace('"', '')
+#function call---------------------------------------------------------------->
+        soup = request_page(url)
+        #Find the link with the set_id.
+        a_list = soup.find_all(href=re.compile('\?set_id='))
 #debugging-------------------------------------------------------------------->
         if debugging:
-            print('debugging\n' + temp_str + '\ndebugging\n')
-        #Get the a element with the card_id.
-        temp_a = card_soup.find_all(href=re.compile(temp_str))
-        if(len(temp_a) == 1):
-            #Save the link.
-            card_data['card_id_url'] = temp_a[0]['href']
-            #Get the card_id
-            temp_list = temp_a[0]['href'].split('-')
-            card_data['card_id'] = temp_list[len(temp_list) - 1]
-            return card_data
-        #If the card was not found, check the next page if available.
-        elif(card_data['card_id_url'] == '' and page_num < 5):
-            page_num += 1
-            temp_url = url + '&rowNum=25&page=' + str(page_num)
-            print(url)
-            card_data = get_card_id(temp_url, card_data, page_num)
-            return card_data
+            print('url:', a_list[0]['href'])
+        #Save the set_id.
+        temp_list = a_list[0]['href'].split('set_id=')
+        temp_list = temp_list[1].split('&')
+        card_data['set_id'] = temp_list[0]
+#debugging-------------------------------------------------------------------->
+        if debugging:
+            print(card_data['set_id'])
+        #Request the set page.
+        soup = request_page(a_list[0]['href'])
+        #Create a string to match the href attribute.
+        temp_str = (card_data['temp_year_name'] + '/'
+                    + card_data['temp_set_name'].replace(' ', '-').lower()
+                    + '/' + card_data['temp_card_number'] + '-')
+        temp_list = []
+        while len(temp_list) == 0:
+            #Find the link with the card_id.
+            temp_list = soup.find_all(href=re.compile(temp_str))
+#debugging-------------------------------------------------------------------->
+            if debugging:
+                print(temp_str)
+                print(len(temp_list), 'matches were found for the card')
+            #If found, save the card_id_url and card_id.
+            if len(temp_list) == 1:
+                #Save the link.
+                card_data['card_id_url'] = temp_list[0]['href']
+                #Get the card_id
+                temp_list = temp_list[0]['href'].split('-')
+                card_data['card_id'] = temp_list[-1]
+                return card_data
+            #If not found, check the next page if available.
+            elif len(temp_list) == 0 and card_data['card_id_url'] == '':
+                page_num += 1
+                #Create the url for the next page.
+                temp_url = a_list[0]['href'] + '&rowNum=25&page=' + str(page_num)
+            #If more than one is found there is a problem.
+            elif len(temp_list) > 1:
+                input('More than one match was found!')
+            #Request the next page.
+            soup = request_page(temp_url)
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
 def get_card_id_url(card_soup, card_data):
-    #Get the list that contains the data.
+    #Find the list that contains more card_data.
     class_name = 'similar-item similar-item-new'
     ul_list = card_soup.find_all('ul', class_name)
     li_list = ul_list[0].find_all('li')
@@ -528,13 +524,13 @@ def get_card_id_url(card_soup, card_data):
         if 'Set:' in temp_str:
             #Remove the title.
             temp_str = temp_str.replace('Set:', '').strip()
-            #Get the set link.
+            #Find and save the set link.
             a_list = row.find_all('a')
             set_name_link = a_list[0]['href']
             #Get the year from the link.
             temp_list = set_name_link.split('/')
-            card_data['set_year'] = temp_list[len(temp_list) - 3]
-            #Remove the year from the temp_str and save as set_name
+            card_data['set_year'] = temp_list[-3]
+            #Remove the year from the temp_str and save as set_name.
             temp_str = temp_str.replace(card_data['set_year'], '', 1)
             card_data['set_name'] = temp_str.strip()
         if 'Card Number:' in temp_str:
@@ -542,12 +538,13 @@ def get_card_id_url(card_soup, card_data):
             temp_str = temp_str.replace('Card Number:', '').strip()
             card_data['card_number'] = temp_str
         if 'Other Attributes:' in temp_str:
+            #Remove the title.
             temp_str = temp_str.replace('Other Attributes:', '').strip()
             temp_str = temp_str.replace('(', '').strip()
             temp_str = temp_str.replace(')', '').strip()
             card_data['attribute_name'].append(temp_str)
         if 'Attributes:' in temp_str:
-            #Get the links with the attribute_name.
+            #Find the links with the attribute_name.
             a_list = row.find_all('a')
             for entry in a_list:
                 temp_str = entry.text.strip()
@@ -555,6 +552,7 @@ def get_card_id_url(card_soup, card_data):
                 temp_str = temp_str.replace(')', '').strip()
                 card_data['attribute_name'].append(entry.text)
         if 'Print Run:' in temp_str:
+            #Remove the title.
             temp_str = temp_str.replace('Print Run:', '').strip()
             card_data['print_run'] = temp_str
         if 'Player:' in temp_str:
@@ -570,7 +568,7 @@ def get_card_id_url(card_soup, card_data):
 #function call---------------------------------------------------------------->
                 card_data = get_player_name(card_soup, card_data)
                 temp_list = temp_str.split('-')
-                temp_str = temp_list[len(temp_list) - 1]
+                temp_str = temp_list[-1]
                 card_data['player_id'].append(temp_str)
     #Update the card_name field.
     temp_str = card_data['card_name']
@@ -579,7 +577,7 @@ def get_card_id_url(card_soup, card_data):
     temp_str = temp_str.replace(card_data['card_number'], '', 1).strip()
     card_data['card_name'] = temp_str
 #debugging-------------------------------------------------------------------->
-    #print(card_data)
+    print(card_data)
     return card_data
 def get_card_price(card_soup, card_data):
     #Get the div that contains the price data.
@@ -619,8 +617,6 @@ def get_inventory_id_url(card_soup, card_data):
                     break
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(div_list)) + ' div elements with '
-        'className="price-div" were found.')
     #Get the div that contains the grade data.
     try:
         div_list = card_soup.find_all('div', 'condition')
@@ -633,8 +629,6 @@ def get_inventory_id_url(card_soup, card_data):
                 break
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(div_list)) + ' div elements with '
-        'className="condition" were found.')
     #Get the h4 that contains quantity data.
     try:
         h4_list = card_soup.find_all('h4', 'lineheight-34')
@@ -648,8 +642,6 @@ def get_inventory_id_url(card_soup, card_data):
                 break
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(h4_list)) + ' h4 elements with '
-        'className="lineheight-34" were found.')
     #Get the sport, team, brand, and manufaturer.
     try:
         li_list = card_soup.find_all('li')
@@ -708,39 +700,32 @@ def get_inventory_id_url(card_soup, card_data):
         return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(div_list)) + ' li elements were found.')
-        exception_list.append(str(len(a_list)) + ' a elements were found '
-        'in the li element.')
 def get_page_links(soup):
     #Create a dictionary to store return values.
-    page_links = {}
+    page_links = {'next_page_link': '', 'last_page_link': '',
+                  'next_page_num': 1, 'last_page_num': 1}
     try:
-        #Get the li element that holds the next page button.
+        #Find the li element that holds the next page button.
         li_list = soup.find_all('li', 'next')
-        #Get the a element that holds the next page link.
-        a_list = li_list[0].find_all('a')
-        page_links['next_page_link'] = a_list[0]['href']
-        #Get the li element that holds the last page button.
-        li_list2 = soup.find_all('li', 'last')
-        #Get the a element that holds the last page link.
-        a_list2 = li_list2[1].find_all('a')
-        page_links['last_page_link'] = a_list2[0]['href']
-        #Find the next and last page number.
-        temp_list = page_links['next_page_link'].split('=')
-        page_links['next_page_num'] = int(temp_list[len(temp_list) - 1])
-        temp_list = page_links['last_page_link'].split('=')
-        page_links['last_page_num'] = int(temp_list[len(temp_list) - 1])
-        return page_links
+        if li_list != 0:
+            #Find the a element that holds the next page link.
+            a_list = li_list[0].find_all('a')
+            page_links['next_page_link'] = a_list[0]['href']
+            #Get the next page number.
+            temp_list = page_links['next_page_link'].split('=')
+            page_links['next_page_num'] = int(temp_list[-1])
+        #Find the li element that holds the last page button.
+        li_list = soup.find_all('li', 'last')
+        if li_list != 0:
+            #Get the a element that holds the last page link.
+            a_list = li_list[1].find_all('a')
+            page_links['last_page_link'] = a_list[0]['href']
+            #Get the last page number.
+            temp_list = page_links['last_page_link'].split('=')
+            page_links['last_page_num'] = int(temp_list[-1])
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(li_list)) + ' li elements with '
-        'className="next" were found.')
-        exception_list.append(str(len(a_list)) + ' a elements were found '
-        'in the first li element.')
-        exception_list.append(str(len(li_list2)) + ' li elements with '
-        'className="last" were found.')
-        exception_list.append(str(len(a_list2)) + ' a elements were found '
-        'in the first li element.')
+    return page_links
 def get_player_name(card_soup, card_data):
     class_name = 'pull-left paddingLeft10'
     #Get the official player_name.
@@ -750,10 +735,8 @@ def get_player_name(card_soup, card_data):
         card_data['player_name'].append(temp_str)
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(str(len(div_list)) + ' div elements with '
-        'className="pull-left paddingLeft10" were found.')
     return card_data
-def get_tcf_dealer_home_search(soup):
+def search_dealer_home(soup):
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
@@ -774,24 +757,24 @@ def get_tcf_dealer_home_search(soup):
                          'attribute_name': list(), 'print_run': 0,
                          'card_id_url': ''
                          }
-            print('Card#:', i + 1)
-            #Get the a element that contains the inventory_id_url.
+            print('Card#:', i)
+            #Find the a element that contains the inventory_id_url.
             a_list = li_list[i].find_all('a')
             #Save the link.
             inventory_id_url = a_list[0]['href']
-            #Save the unformatted card_name.
-            temp_str = a_list[0].text.strip()
-            #Replace special character sequences that produce errors.
-            temp_str = temp_str.replace('...~', '')
-            temp_str = temp_str.replace('  ', ' ')
-            temp_str = temp_str.replace('(', '')
-            temp_str = temp_str.replace(')', '')
-            temp_str = temp_str.replace('\\', '')
-            card_data['card_name'] = temp_str
             #Get the inventory_id from the link.
             temp_list = inventory_id_url.split('_')
-            card_data['inventory_id'] = temp_list[len(temp_list) - 1]
-            #Get the inventory_id_url page.
+            card_data['inventory_id'] = temp_list[-1]
+            #Save the unformatted card_name.
+            temp_str = a_list[0].text.strip()
+            #Save the set_name, set_year, and card_number.
+            temp_list = temp_str.split('#')
+            temp_list2 = temp_list[0].split(' ')
+            card_data['temp_year_name'] = temp_list2[0]
+            card_data['temp_set_name'] = ' '.join(temp_list2[1:]).strip()
+            temp_list3 = temp_list[1].split(' ')
+            card_data['temp_card_number'] = temp_list3[0]
+            #Request the inventory_id_url page.
 #function call---------------------------------------------------------------->
             card_soup = request_page(inventory_id_url)
 #function call---------------------------------------------------------------->
@@ -801,28 +784,21 @@ def get_tcf_dealer_home_search(soup):
             #If the inventory_id is found, update the quantity and price.
             if len(result) == 1:
                 sql_update_inventory(card_data)
-            #If the card is not found, get the card_id.
-            if len(result) >= 0:#Override for adding items with known attributes.
-            # elif len(result) == 0:
-                #Create a link to search for the page that contains the card_id.
-                #Get the year from the card_name.
-                temp_list = card_data['card_name'].split(' ')
-                set_year = temp_list[0]
-                #Replace any single spaces with a plus sign.
-                temp_str = temp_str.replace(' ', '+')
-                #Format temp_str for web address.
-                temp_str = temp_str.replace('#', '%23')
-                temp_str = temp_str.replace('/', '%2F')
-                temp_str = temp_str.replace('*', '%2A')
-                temp_str = temp_str.replace(';', '%3B')
-                temp_str = temp_str.replace(',', '%2C')
-                temp_str = temp_str.replace('"', '')
+            #If the inventory_id is not found, get the card_id.
+            elif len(result) == 0:
                 #Create a page number to ensure that the card_id is found.
                 page_num = 1
-                url = ('https://www.beckett.com/search/?term='
-                       + temp_str + '&year_start=' + set_year)
+                #Create a url for the set page.
+                url = ('https://www.beckett.com/'
+                       + card_data['category_name'][0].lower() + '/'
+                       + card_data['temp_year_name'] + '/'
+                       + card_data['temp_set_name'].replace(' ', '-').lower()
+                       + '/')
+#debugging-------------------------------------------------------------------->
+                if debugging:
+                    print('debugging-->', url, '\ndebugging\n')
 #function call---------------------------------------------------------------->
-                #Get the card_id.
+                #Get the set_id and card_id.
                 card_data = get_card_id(url, card_data, page_num)
                 #Get more information from the card_id_url.
 #function call---------------------------------------------------------------->
@@ -840,6 +816,26 @@ def get_tcf_dealer_home_search(soup):
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
         print(len(a_list), 'a elements were found in li element #:', i, '.')
+def search_for_term(location, search_str, page_str):
+    #Create the url to search.
+    url = (location + search_str + page_str)
+    #function call---------------------------------------------------------------->
+    soup = request_page(url)
+    #Get the next and last page links.
+    #function call---------------------------------------------------------------->
+    page_links = get_page_links(soup)
+    #Cycle through the pages and scrape each page.
+    for x in range(page - 1, page_links['last_page_num']):
+        print('Page', x + 1)
+        #Set the default currency.
+        set_currency()
+    #function call---------------------------------------------------------------->
+        search_dealer_home(soup)
+        if not(x == page_links['last_page_num'] - 1):
+    #function call---------------------------------------------------------------->
+            soup = request_page(page_links['next_page_link'])
+    #function call---------------------------------------------------------------->
+            page_links = get_page_links(soup)
 def request_page(url):
     try:
         #Get the page requested.
@@ -850,7 +846,6 @@ def request_page(url):
         return BeautifulSoup(c, 'lxml')
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(url)
 def set_currency():
     url = ('https://www.beckett.com/home/update_currency_country')
     payload = {'currency': '1'}
@@ -868,7 +863,6 @@ def set_currency():
             print('The default currency should be USD.')
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
-        exception_list.append(url)
 #Connect to the inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
@@ -882,51 +876,29 @@ cursor = cnx.cursor()
 cursor.execute('SET autocommit = 0')
 cnx.commit()
 
-#Create a list to hold exceptions.
-exception_list = list()
-
-# page = 29
-# #Go to the tcf marketplace page and search newly added items.
-# url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       # 'search_new/?result_type=59&NewlyMPAdded=1&page=' + str(page))
-# #Override for first 10,000 items.
-# page = 33
-# #Go to the tcf marketplace page and search all items.
-# url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       # 'search_new/?result_type=59&page=' + str(page))
-
-#Override variables.
-page = 39
-card_start = 0
+#Global variables.
+page = 1
+card_start = 1
 card_end = 100
 debugging = False
-#debugging = True
-#Go to the tcf marketplace page and search all rookie cards.
-url = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-       'search_new/?attr=RC&page=' + str(page))
-       
-#Get the first page.
-#function call---------------------------------------------------------------->
-soup = request_page(url)
-#Get the next and last page links.
-#function call---------------------------------------------------------------->
-page_links = get_page_links(soup)
-#Cycle through the pages and scrape each page.
-for x in range(page - 1, page_links['last_page_num']):
-# for x in range(page - 1, 1):
-    print('Page', x + 1)
-    #Set the default currency.
-    set_currency()
-#function call---------------------------------------------------------------->
-    get_tcf_dealer_home_search(soup)
-    if not(x == page_links['last_page_num'] - 1):
-#function call---------------------------------------------------------------->
-        soup = request_page(page_links['next_page_link'])
-#function call---------------------------------------------------------------->
-        page_links = get_page_links(soup)
+debugging = True
+#TCF marketplace dealer home.
+dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
+               'search_new/')
+#Beckett Pricing/Checklists.
+beckett_home = ('https://www.beckett.com/search/')
+#search_str = ('?attr=RC')#All rookie cards.
+#search_str = ('?result_type=59')#First 10,000 items.
+#search_str = ('?result_type=59&NewlyMPAdded=1')#Newly added items.
+search_str = ('?term=')#Specific search term.
+page_str = ('&page=' + str(page))
+
+#Start the search.
+#search_for_term(dealer_home, search_str, page_str)
+for i in range(1933, 2018):
+    search_str += str(i)
+    search_for_term(dealer_home, search_str, page_str)
         
 cursor.close()
 cnx.close()
-print('Exceptions---->')
-print(exception_list)
 print('All records have been updated.')
