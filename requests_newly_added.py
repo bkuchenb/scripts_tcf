@@ -703,8 +703,15 @@ def get_inventory_id_url(card_soup, card_data):
 def get_page_links(soup):
     #Create a dictionary to store return values.
     page_links = {'next_page_link': '', 'last_page_link': '',
-                  'next_page_num': 1, 'last_page_num': 1}
+                  'next_page_num': 1, 'last_page_num': 1, 'records': ''}
     try:
+        #Find the total number of records.
+        temp_str = soup.find(string=re.compile('Showing records 1 - '))
+        temp_list = temp_str.split('of')
+        page_links['records'] = int(temp_list[-1].strip())
+#debugging-------------------------------------------------------------------->
+        if debugging:
+            print(page_links['records'], 'records were found.')        
         #Find the li element that holds the next page button.
         li_list = soup.find_all('li', 'next')
         if li_list != 0:
@@ -819,22 +826,22 @@ def search_dealer_home(soup):
 def search_for_term(location, search_str, page_str):
     #Create the url to search.
     url = (location + search_str + page_str)
-    #function call---------------------------------------------------------------->
+#function call---------------------------------------------------------------->
     soup = request_page(url)
     #Get the next and last page links.
-    #function call---------------------------------------------------------------->
+#function call---------------------------------------------------------------->
     page_links = get_page_links(soup)
     #Cycle through the pages and scrape each page.
     for x in range(page - 1, page_links['last_page_num']):
         print('Page', x + 1)
         #Set the default currency.
         set_currency()
-    #function call---------------------------------------------------------------->
+#function call---------------------------------------------------------------->
         search_dealer_home(soup)
         if not(x == page_links['last_page_num'] - 1):
-    #function call---------------------------------------------------------------->
+#function call---------------------------------------------------------------->
             soup = request_page(page_links['next_page_link'])
-    #function call---------------------------------------------------------------->
+#function call---------------------------------------------------------------->
             page_links = get_page_links(soup)
 def request_page(url):
     try:
