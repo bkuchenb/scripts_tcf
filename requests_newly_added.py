@@ -573,10 +573,10 @@ def get_card_url(card_soup, card_data):
                 card_data['player_url'].append(entry['href'])
                 #Get the official player_name.
 #function call---------------------------------------------------------------->
-                card_soup = request_page(card_data['player_url'])
+                card_soup = request_page(entry['href'])
 #function call---------------------------------------------------------------->
                 card_data = get_player_name(card_soup, card_data)
-                temp_list = temp_str.split('-')
+                temp_list = entry['href'].split('-')
                 temp_str = temp_list[-1]
                 card_data['player_id'].append(temp_str)
     #Update the card_name field.
@@ -584,10 +584,10 @@ def get_card_url(card_soup, card_data):
     temp_str = temp_str.replace(card_data['set_year'], '', 1).strip()
     temp_str = temp_str.replace(card_data['set_name'], '', 1).strip()
     temp_str = temp_str.replace(card_data['card_number'], '', 1).strip()
-    #Escape the card_name so it can be added to the database.
-    card_data['card_name'] = cnx.escape_string(temp_str)
+    card_data['card_name'] = temp_str
 #debugging-------------------------------------------------------------------->
-    #print(card_data)
+    if debugging:
+        print(card_data)
     return card_data
 def get_inventory_url(card_soup, card_data):
     #Get the image links.
@@ -654,7 +654,7 @@ def get_inventory_url(card_soup, card_data):
                 a_list = row.find_all('a')
                 for entry in a_list:
                     card_data['category_url'].append(entry['href'])
-                    temp_list = card_data['category_url'].split('=')
+                    temp_list = entry['href'].split('=')
                     temp_str = temp_list[len(temp_list) - 1]
                     card_data['category_id'].append(temp_str)
             #Get the team_name and team_id.
@@ -666,7 +666,7 @@ def get_inventory_url(card_soup, card_data):
                 a_list = row.find_all('a')
                 for entry in a_list:
                     card_data['team_url'].append(entry['href'])
-                    temp_list = temp_str.split('=')
+                    temp_list = entry['href'].split('=')
                     temp_str = temp_list[len(temp_list) - 1]
                     card_data['team_id'].append(temp_str)
             #Get the brand info.
@@ -678,7 +678,7 @@ def get_inventory_url(card_soup, card_data):
                 a_list = row.find_all('a')
                 for entry in a_list:
                     card_data['brand_url'].append(entry['href'])
-                    temp_list = card_data['brand_url'].split('=')
+                    temp_list = entry['href'].split('=')
                     temp_str = temp_list[len(temp_list) - 1]
                     card_data['brand_id'].append(temp_str)
             #Get the manufacturer info.
@@ -690,7 +690,7 @@ def get_inventory_url(card_soup, card_data):
                 a_list = row.find_all('a')
                 for entry in a_list:
                     card_data['manufacturer_url'].append(entry['href'])
-                    temp_list = card_data['manufacturer_url'].split('=')
+                    temp_list = entry['href'].split('=')
                     temp_str = temp_list[len(temp_list) - 1]
                     card_data['manufacturer_id'].append(temp_str)
                 break
@@ -770,14 +770,14 @@ def search_dealer_home(soup):
             #Find the a element that contains the inventory_url.
             a_list = li_list[i].find_all('a')
             #Save the link.
-            card_cata['inventory_url'] = a_list[0]['href']
+            card_data['inventory_url'] = a_list[0]['href']
             #Get the inventory_id from the link.
-            temp_list = card_cata['inventory_url'] .split('_')
+            temp_list = card_data['inventory_url'] .split('_')
             card_data['inventory_id'] = temp_list[-1]
             #Save the unformatted card_name.
-            temp_str = a_list[0].text.strip()
+            card_data['card_name'] = a_list[0].text.strip()
             #Save the set_name, set_year, and card_number.
-            temp_list = temp_str.split('#')
+            temp_list = card_data['card_name'].split('#')
             temp_list2 = temp_list[0].split(' ')
             card_data['temp_year_name'] = temp_list2[0]
             card_data['temp_set_name'] = ' '.join(temp_list2[1:]).strip()
@@ -785,7 +785,7 @@ def search_dealer_home(soup):
             card_data['temp_card_number'] = temp_list3[0]
             #Request the inventory_url page.
 #function call---------------------------------------------------------------->
-            card_soup = request_page(card_cata['inventory_url'])
+            card_soup = request_page(card_data['inventory_url'])
 #function call---------------------------------------------------------------->
             card_data = get_inventory_url(card_soup, card_data)
             #Check to see if the card has been added to tcf_inventory.
@@ -835,6 +835,7 @@ def search_for_term(location, search_str, page_str):
     page_links = get_page_links(soup)
     if page_links['records'] > 10000:
         print('This search will need to be refined.')
+        print('There are more than 10,000 records.')
     #Cycle through the pages and scrape each page.
     for x in range(page - 1, page_links['last_page_num']):
         print('Page', x + 1)
@@ -899,16 +900,16 @@ dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
 #Beckett Pricing/Checklists.
 beckett_home = ('https://www.beckett.com/search/')
 #search_str = ('?attr=RC')#All rookie cards.
-#search_str = ('?result_type=59')#First 10,000 items.
+search_str = ('?result_type=59')#First 10,000 items.
 #search_str = ('?result_type=59&NewlyMPAdded=1')#Newly added items.
-search_str = ('?term=')#Specific search term.
+#search_str = ('?term=')#Specific search term.
 page_str = ('&page=' + str(page))
 
 #Start the search.
-#search_for_term(dealer_home, search_str, page_str)
-for i in range(1933, 1934):
-    search_str += str(i)
-    search_for_term(dealer_home, search_str, page_str)
+search_for_term(dealer_home, search_str, page_str)
+# for i in range(1933, 1934):
+    # search_str += str(i)
+    # search_for_term(dealer_home, search_str, page_str)
         
 cursor.close()
 cnx.close()
