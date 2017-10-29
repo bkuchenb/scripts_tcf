@@ -703,7 +703,7 @@ def get_page_links(soup):
                   'next_page_num': 1, 'last_page_num': 1, 'records': ''}
     try:
         #Find the total number of records.
-        temp_str = soup.find(string=re.compile('Showing records 1 - '))
+        temp_str = soup.find(string=re.compile('Showing records '))
         temp_list = temp_str.split('of')
         page_links['records'] = int(temp_list[-1].strip())
 #debugging-------------------------------------------------------------------->
@@ -745,7 +745,7 @@ def search_dealer_home(soup):
     try:
         li_list = soup.find_all('li', 'title')
         #For each card, get the card_name, inventory_url, and inventory_id.
-        for i in range(card_start, card_end):
+        for i in range(card_start - 1, card_end):
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
                          'brand_url': list(),
@@ -766,7 +766,7 @@ def search_dealer_home(soup):
                          'attribute_name': list(), 'print_run': 0,
                          'card_url': '', 'inventory_url': ''
                          }
-            print('Card#:', i)
+            print('Card#:', i + 1)
             #Find the a element that contains the inventory_url.
             a_list = li_list[i].find_all('a')
             #Save the link.
@@ -893,7 +893,7 @@ page = 1
 card_start = 1
 card_end = 100
 debugging = False
-debugging = True
+#debugging = True
 #TCF marketplace dealer home.
 dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
                'search_new/')

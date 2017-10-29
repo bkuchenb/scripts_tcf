@@ -12,7 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 #Import datetime to calculate different days.
 import datetime
-#Import the mysql.connector module to connect to the tcf_database.
+#Import the MySQLdb module to connect to the inceff database.
 import MySQLdb
 #Import sys and traceback for error debugging.
 import sys
@@ -43,7 +43,7 @@ wait = WebDriverWait(browser, 10)
 
 #Get today's date.
 today = datetime.date.today()
-#Get the date for 8 days ago.
+#Get the date for 28 days ago.
 start_date = today - datetime.timedelta(days = 28)
 #Get yesterday's date.
 end_date = today - datetime.timedelta(days = 1)
