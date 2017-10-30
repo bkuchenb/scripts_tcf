@@ -875,6 +875,38 @@ def set_currency():
             print('The default currency should be USD.')
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
+def request_orders():
+    #Log in to beckett.com.
+    url = 'https://www.beckett.com/login/'
+    payload = {'loginEmail': 'dialcard@nycap.rr.com',
+               'loginPassword': 'ruthmick'}
+    try:
+        s = requests.Session()
+        r = s.post(url, data=payload)
+        #Request the orers page.
+        url = ('https://marketplace.beckett.com/admin/search_orders/')
+        #url = ('https://marketplace.beckett.com/mp_orders/ajax_get_orders_history')
+        payload = {'search': 'false', 'rows': 100,
+               'page': page, 'sidx': 'created', 'sord': 'desc',
+               'nd': '1509311640723', '_': '1509311640725'}
+        r = s.get(url)
+        #r = s.get(url, data=payload)
+        print(r.status_code)
+        print(r.headers['content-type'])
+        
+#        data = r.json()
+#        print(data.keys())
+        #Save the content.
+        c = r.content
+        #Parse the content.
+        soup = BeautifulSoup(c, 'lxml')
+        table = soup.find_all('table')#id='orders_table'
+        print(len(table))
+        temp_list = soup.find_all(attrs={'aria-describedby':
+            'orders_table_order_id'})
+        #print(soup.prettify)
+    except requests.Timeout as err:
+        print('Something went wrong: {}'.format(err))
 #Connect to the inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
@@ -889,24 +921,25 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-page = 12
-card_start = 1
-card_end = 100
-debugging = False
-#debugging = True
-#TCF marketplace dealer home.
-dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
-               'search_new/')
-#Beckett Pricing/Checklists.
-beckett_home = ('https://www.beckett.com/search/')
-#search_str = ('?attr=RC')#All rookie cards.
-search_str = ('?result_type=59')#First 10,000 items.
-#search_str = ('?result_type=59&NewlyMPAdded=1')#Newly added items.
-#search_str = ('?term=')#Specific search term.
-page_str = ('&page=' + str(page))
-
-#Start the search.
-search_for_term(dealer_home, search_str, page_str)
+page = 1
+soup = request_orders()
+#card_start = 1
+#card_end = 100
+#debugging = False
+##debugging = True
+##TCF marketplace dealer home.
+#dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
+#               'search_new/')
+##Beckett Pricing/Checklists.
+#beckett_home = ('https://www.beckett.com/search/')
+##search_str = ('?attr=RC')#All rookie cards.
+#search_str = ('?result_type=59')#First 10,000 items.
+##search_str = ('?result_type=59&NewlyMPAdded=1')#Newly added items.
+##search_str = ('?term=')#Specific search term.
+#page_str = ('&page=' + str(page))
+#
+##Start the search.
+#search_for_term(dealer_home, search_str, page_str)
 # for i in range(1933, 1934):
     # search_str += str(i)
     # search_for_term(dealer_home, search_str, page_str)

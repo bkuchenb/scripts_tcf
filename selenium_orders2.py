@@ -78,7 +78,7 @@ from_date = browser.find_element_by_id('add_date')
 from_date.send_keys(start_date)
 #Find the To Date text box.
 to_date = browser.find_element_by_id('modify_date')
-#Enter yesterday's date.
+#Enter the end_date.
 to_date.send_keys(end_date)
 #Find the filter button.
 filter_btn = browser.find_element_by_id('formfilter')
@@ -90,18 +90,23 @@ time.sleep(5)
 #Find the number of pages.
 pages = browser.find_element_by_id('sp_1')
 print(pages.text)
-#Check to see if more than 1 page of records exist.
+#If there is more than 1 page of records, change the number displayed.
 if pages.text != '1':
-    #If more than 1 page, change the number of records displayed.
     #Find the drop down box.
     select = browser.find_element_by_xpath("//select[@class=\"ui-pg-selbox\"]")
     #Save all the drop down box options.
     all_options = select.find_elements_by_tag_name("option")
     #Choose to display 100 records.
     all_options[3].click()
-    print(all_options[3].text)
 #Wait for the page to load.
 time.sleep(10)
+#Find the orders table.
+orders_table = browser.find_element_by_id('orders_table')
+#Find the tbody element in the orders table.
+tbody = orders_table.find_element_by_tag_name('tbody')
+#Find all the rows in the tbody.
+tr_list = tbody.find_elements_by_tag_name('tr')
+print(len(tr_list))
 #Find and save all order IDs.
 orderIds = browser.find_elements_by_xpath('//td[@aria-describedby=' 
                                          + '\"orders_table_order_id\"]')
