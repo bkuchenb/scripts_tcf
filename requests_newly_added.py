@@ -504,7 +504,7 @@ def add_card_data(card_data: dict):
                 sql_insert_player(card_data, index)
             #Check to see if the card_player has already been added.
             result = sql_select_card_player(card_data, index)
-            #If the card_player doesn't exist, insert it into tcf_card_player.
+            #If the card_player doesn't exist, insert it.
             if(len(result) == 0):
                 sql_insert_card_player(card_data, index)
 
@@ -591,7 +591,8 @@ def get_card_id(url: str, card_data: dict, page_num: int) -> dict:
             elif len(temp_list) == 0 and card_data['card_url'] == '':
                 page_num += 1
                 #Create the url for the next page.
-                temp_url = a_list[0]['href'] + '&rowNum=25&page=' + str(page_num)
+                temp_url = (a_list[0]['href'] + '&rowNum=25&page='
+                            + str(page_num))
             #If more than one is found there is a problem.
             elif len(temp_list) > 1:
                 temp_str = str(len(temp_list))
@@ -699,7 +700,8 @@ def get_inventory_url(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
             if 'Price:' in temp_str:
                 #Remove the title and discount rate.
                 temp_str = temp_str.replace('Price:', '').strip()
-                temp_str = temp_str.replace('xx% off Beckett Value', '').strip()
+                temp_str = temp_str.replace('xx% off Beckett Value', '')
+                temp_str = temp_str.strip()
                 #Check to see if a Canadian price is present.
                 if 'CAD' in temp_str:
                     temp_list = temp_str.split('CAD')
@@ -717,7 +719,8 @@ def get_inventory_url(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
             temp_str = row.text.strip()
             if 'Condition:' in temp_str:
                 #Remove the title.
-                card_data['condition'] = temp_str.replace('Condition:', '').strip()
+                temp_str = temp_str.replace('Condition:', '').strip()
+                card_data['condition'] = temp_str
                 break
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
