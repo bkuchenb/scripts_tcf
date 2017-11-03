@@ -780,7 +780,8 @@ def search_dealer_home(soup):
             temp_list = card_data['card_name'].split('#')
             temp_list2 = temp_list[0].split(' ')
             card_data['temp_year_name'] = temp_list2[0]
-            card_data['temp_set_name'] = ' '.join(temp_list2[1:]).strip()
+            temp_str = ' '.join(temp_list2[1:]).strip()
+            card_data['temp_set_name'] = temp_str.replace("'", '')
             temp_list3 = temp_list[1].split(' ')
             card_data['temp_card_number'] = temp_list3[0]
             #Request the inventory_url page.
@@ -889,7 +890,7 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-page = 12
+page = 1
 card_start = 1
 card_end = 100
 debugging = False
@@ -900,16 +901,16 @@ dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
 #Beckett Pricing/Checklists.
 beckett_home = ('https://www.beckett.com/search/')
 #search_str = ('?attr=RC')#All rookie cards.
-search_str = ('?result_type=59')#First 10,000 items.
+#search_str = ('?result_type=59')#First 10,000 items.
 #search_str = ('?result_type=59&NewlyMPAdded=1')#Newly added items.
-#search_str = ('?term=')#Specific search term.
+search_str = ('?term=')#Specific search term.
 page_str = ('&page=' + str(page))
 
 #Start the search.
-search_for_term(dealer_home, search_str, page_str)
-# for i in range(1933, 1934):
-    # search_str += str(i)
-    # search_for_term(dealer_home, search_str, page_str)
+#search_for_term(dealer_home, search_str, page_str)
+for i in range(2017, 2018):
+    search_str += str(i)
+    search_for_term(dealer_home, search_str, page_str)
         
 cursor.close()
 cnx.close()
