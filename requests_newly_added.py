@@ -1003,7 +1003,7 @@ cnx.commit()
 
 #Global variables.
 year = 2017
-page = 9
+page = 11
 card_start = 1
 card_end = 100
 debugging = False
@@ -1016,11 +1016,11 @@ beckett_home = ('https://www.beckett.com/search/')
 #search_str = ('?attr=RC')#All rookie cards.
 #search_str = ('?result_type=59')#First 10,000 items.
 #search_str = ('?result_type=59&NewlyMPAdded=1')#Newly added items.
-search_str = ('?term=')#Specific search term.
+#search_str = ('?term=')#Specific search term.
+search_str = ('?term=' + str(year))#Specific year.
 page_str = ('&page=' + str(page))
 
 #Start the search.
-search_str += str(year)
 search_for_term(dealer_home, search_str, page_str)
         
 cursor.close()
