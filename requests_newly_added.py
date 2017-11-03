@@ -10,7 +10,21 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
-def sql_insert_brand(card_data, index):
+def sql_insert_attribute(card_data: dict, index: int):
+    insert = ("INSERT INTO tcf_attribute(attribute_name) "
+              "VALUES({attribute_name!r})")
+#debugging-------------------------------------------------------------------->
+    #print(insert.format(**card_data))
+    try:
+        cursor.execute(insert.format(**card_data))
+        cnx.commit()
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the query.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**card_data))
+
+
+def sql_insert_brand(card_data: dict, index: int):
 #Add the item if the number of ids and names matches.
     if(len(card_data['brand_id']) != len(card_data['brand_name'])):
         print("The number of ids and names doesn't match.")
@@ -28,7 +42,9 @@ def sql_insert_brand(card_data, index):
         #If the insert fails, print a message and the statement.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_card(card_data):
+
+
+def sql_insert_card(card_data: dict):
     insert = ("INSERT INTO tcf_card"
               "(card_id, set_id, card_number, card_name, "
               "image_src_back, image_src_front, "
@@ -45,7 +61,9 @@ def sql_insert_card(card_data):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_card_attribute(card_data, index):
+
+
+def sql_insert_card_attribute(card_data: dict, index: int):
     insert = ("INSERT INTO tcf_card_attribute(card_id, attribute_id) "
               "VALUES({card_id}, {attribute_id})")
 #debugging-------------------------------------------------------------------->
@@ -57,7 +75,9 @@ def sql_insert_card_attribute(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_card_player(card_data, index):
+
+
+def sql_insert_card_player(card_data: dict, index: int):
     insert = ("INSERT INTO tcf_card_player(player_id, card_id) "
               "VALUES({player_id[" + str(index) + "]}, "
               "{card_id})")
@@ -70,7 +90,9 @@ def sql_insert_card_player(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_card_team(card_data, index):
+
+
+def sql_insert_card_team(card_data: dict, index: int):
     insert = ("INSERT INTO tcf_card_team(team_id, card_id) "
               "VALUES({team_id[" + str(index) + "]}, "
               "{card_id})")
@@ -83,7 +105,9 @@ def sql_insert_card_team(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_category(card_data, index):
+
+
+def sql_insert_category(card_data: dict, index: int):
     insert = ("INSERT INTO tcf_category"
               "(category_id, category_name, category_url) "
               "VALUES({category_id[" + str(index) + "]}, "
@@ -98,7 +122,9 @@ def sql_insert_category(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_inventory(card_data):
+
+
+def sql_insert_inventory(card_data: dict):
     insert = ("INSERT INTO tcf_inventory(inventory_id, card_id, grade, "
               "quantity, max, min, price, inventory_url) "
               "VALUES({inventory_id}, {card_id}, {condition!r}, "
@@ -112,7 +138,9 @@ def sql_insert_inventory(card_data):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_manufacturer(card_data, index):
+
+
+def sql_insert_manufacturer(card_data: dict, index: int):
     #Add the item if the number of ids and names matches.
     if(len(card_data['manufacturer_id'])
     != len(card_data['manufacturer_name'])):
@@ -132,7 +160,9 @@ def sql_insert_manufacturer(card_data, index):
         #If the insert fails, print a message and the statement.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_player(card_data, index):
+
+
+def sql_insert_player(card_data: dict, index: int):
     #Add the item if the number of ids and names matches.
     if(len(card_data['player_id']) != len(card_data['player_name'])):
         print("The number of ids and names doesn't match.")
@@ -150,7 +180,9 @@ def sql_insert_player(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_set(card_data):
+
+
+def sql_insert_set(card_data: dict):
     #Add the set to tcf_set if there is only one manufacturer and one brand.
     if(len(card_data['manufacturer_id']) > 1
        or len(card_data['brand_id']) > 1):
@@ -170,7 +202,9 @@ def sql_insert_set(card_data):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_set_category(card_data, index):
+
+
+def sql_insert_set_category(card_data: dict, index: int):
     insert = ("INSERT INTO tcf_set_category(category_id, set_id) "
               "VALUES({category_id[" + str(index) + "]}, "
               "{set_id})")
@@ -183,7 +217,9 @@ def sql_insert_set_category(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_insert_team(card_data, index):
+
+
+def sql_insert_team(card_data: dict, index: int):
     #Add the item if the number of ids and names matches.
     if(len(card_data['team_id']) != len(card_data['team_name'])):
         print("The number of ids and names doesn't match.")
@@ -201,7 +237,9 @@ def sql_insert_team(card_data, index):
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**card_data))
-def sql_select_attribute(card_data, index):
+
+
+def sql_select_attribute(card_data: dict, index: int) -> list:
     select = ("SELECT attribute_id "
               "FROM tcf_attribute "
               "WHERE attribute_name = {attribute_name[" + str(index) + "]!r}")
@@ -212,7 +250,9 @@ def sql_select_attribute(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_brand(card_data, index):
+
+
+def sql_select_brand(card_data: dict, index: int) -> list:
     select = ("SELECT brand_id "
               "FROM tcf_brand "
               "WHERE brand_id = {brand_id[" + str(index) + "]}")
@@ -223,7 +263,9 @@ def sql_select_brand(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_card(card_data):
+
+
+def sql_select_card(card_data: dict) -> list:
     select = ("SELECT card_id "
               "FROM tcf_card "
               "WHERE card_id = {card_id}")
@@ -234,7 +276,9 @@ def sql_select_card(card_data):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_card_attribute(card_data, index):
+
+
+def sql_select_card_attribute(card_data: dict, index: int) -> list:
     select = ("SELECT * "
               "FROM tcf_card_attribute "
               "WHERE card_id = {card_id} "
@@ -246,7 +290,9 @@ def sql_select_card_attribute(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_card_player(card_data, index):
+
+
+def sql_select_card_player(card_data: dict, index: int) -> list:
     select = ("SELECT * "
               "FROM tcf_card_player "
               "WHERE card_id = {card_id} "
@@ -258,7 +304,9 @@ def sql_select_card_player(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_card_team(card_data, index):
+
+
+def sql_select_card_team(card_data: dict, index: int) -> list:
     select = ("SELECT * "
               "FROM tcf_card_team "
               "WHERE card_id = {card_id} "
@@ -270,7 +318,9 @@ def sql_select_card_team(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_category(card_data, index):
+
+
+def sql_select_category(card_data: dict, index: int) -> list:
     select = ("SELECT category_id "
               "FROM tcf_category "
               "WHERE category_id = {category_id[" + str(index) + "]}")
@@ -281,7 +331,9 @@ def sql_select_category(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_inventory(card_data):
+
+
+def sql_select_inventory(card_data: dict) -> list:
     select = ("SELECT inventory_id "
               "FROM tcf_inventory "
               "WHERE inventory_id = {inventory_id}")
@@ -292,7 +344,9 @@ def sql_select_inventory(card_data):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_manufacturer(card_data, index):
+
+
+def sql_select_manufacturer(card_data: dict, index: int) -> list:
     select = ("SELECT manufacturer_id "
               "FROM tcf_manufacturer "
               "WHERE manufacturer_id = {manufacturer_id[" + str(index) + "]}")
@@ -303,7 +357,9 @@ def sql_select_manufacturer(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_player(card_data, index):
+
+
+def sql_select_player(card_data: dict, index: int) -> list:
     select = ("SELECT player_id "
               "FROM tcf_player "
               "WHERE player_id = {player_id[" + str(index) + "]}")
@@ -314,7 +370,9 @@ def sql_select_player(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_set(card_data, index):
+
+
+def sql_select_set(card_data: dict, index: int) -> list:
     select = ("SELECT tcf_set.set_id "
               "FROM tcf_set "
               "INNER JOIN tcf_set_category "
@@ -330,7 +388,9 @@ def sql_select_set(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_set_category(card_data, index):
+
+
+def sql_select_set_category(card_data: dict, index: int) -> list:
     select = ("SELECT * "
               "FROM tcf_set_category "
               "WHERE set_id = {set_id} "
@@ -342,14 +402,18 @@ def sql_select_set_category(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_select_set_id():
+
+
+def sql_select_set_id() -> list:
     select = ("SELECT set_id FROM tcf_set ORDER BY set_id DESC LIMIT 1")
     cursor.execute(select)
     result = cursor.fetchone()[0]
 #debugging-------------------------------------------------------------------->
     #print(result)
     return result
-def sql_select_team(card_data, index):
+
+
+def sql_select_team(card_data: dict, index: int) -> list:
     select = ("SELECT team_id "
               "FROM tcf_team "
               "WHERE team_id = {team_id[" + str(index) + "]}")
@@ -360,7 +424,9 @@ def sql_select_team(card_data, index):
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return result
-def sql_update_inventory(card_data):
+
+
+def sql_update_inventory(card_data: dict):
     update = ("UPDATE tcf_inventory "
               "Set quantity = {quantity}, price = {price} "
               "WHERE inventory_id = {inventory_id}")
@@ -373,7 +439,9 @@ def sql_update_inventory(card_data):
         #If the update fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
         print(update.format(**card_data))
-def add_card_data(card_data):
+
+
+def add_card_data(card_data: dict):
     try:
         #Check to see if there is more than 1 brand_id.
         for index in range(0, len(card_data['brand_id'])):
@@ -457,9 +525,17 @@ def add_card_data(card_data):
         for index in range(0, len(card_data['attribute_name'])):
             #Check to see if the attribute has already been added.
             result = sql_select_attribute(card_data, index)
-            #If the attribute doesn't exist, log an exception.
+            #If the attribute doesn't exist, insert it into tcf_attribute.
             if(len(result) == 0):
-                print(card_data['attribute_name'][index])
+                sql_insert_attribute(card_data, index)
+                #Get the attribute_id just created.
+                result = sql_select_attribute(card_data, index)
+                card_data['attribute_id'] = result[0][0]
+                #Check to see if the card_attribute has already been added.
+                result = sql_select_card_attribute(card_data, index)
+                #If the card_attribute doesn't exist, insert it.
+                if(len(result) == 0):
+                    sql_insert_card_attribute(card_data, index)
             else:
                 card_data['attribute_id'] = result[0][0]
                 #Check to see if the card_attribute has already been added.
@@ -469,7 +545,9 @@ def add_card_data(card_data):
                     sql_insert_card_attribute(card_data, index)
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-def get_card_id(url, card_data, page_num):
+
+
+def get_card_id(url: str, card_data: dict, page_num: int) -> dict:
     try:
         #Make the soup.
 #function call---------------------------------------------------------------->
@@ -516,12 +594,25 @@ def get_card_id(url, card_data, page_num):
                 temp_url = a_list[0]['href'] + '&rowNum=25&page=' + str(page_num)
             #If more than one is found there is a problem.
             elif len(temp_list) > 1:
-                input('More than one match was found!')
+                temp_str = str(len(temp_list))
+                temp_str += (' cards have the same number! '
+                             'Which one should we use?')
+                index = int(input(temp_str))
+                #Save the link.
+                card_data['card_url'] = temp_list[index]['href']
+                print(card_data['card_url'])
+                #Get the card_id
+                temp_list = temp_list[index]['href'].split('-')
+                card_data['card_id'] = temp_list[-1]
+                print(card_data['card_id'])
+                return card_data
             #Request the next page.
             soup = request_page(temp_url)
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-def get_card_url(card_soup, card_data):
+
+
+def get_card_url(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
     #Find the list that contains more card_data.
     class_name = 'similar-item similar-item-new'
     ul_list = card_soup.find_all('ul', class_name)
@@ -551,7 +642,9 @@ def get_card_url(card_soup, card_data):
             temp_str = temp_str.replace('Other Attributes:', '').strip()
             temp_str = temp_str.replace('(', '').strip()
             temp_str = temp_str.replace(')', '').strip()
-            card_data['attribute_name'].append(temp_str)
+            temp_list = temp_str.split(',')
+            for row in temp_list:
+                card_data['attribute_name'].append(row.strip())
         if 'Attributes:' in temp_str:
             #Find the links with the attribute_name.
             a_list = row.find_all('a')
@@ -589,7 +682,9 @@ def get_card_url(card_soup, card_data):
     if debugging:
         print(card_data)
     return card_data
-def get_inventory_url(card_soup, card_data):
+
+
+def get_inventory_url(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
     #Get the image links.
     temp_img = card_soup.find_all(id='item_image_front')
     card_data['image_src_front'] = temp_img[0]['src']
@@ -697,7 +792,9 @@ def get_inventory_url(card_soup, card_data):
         return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
-def get_page_links(soup):
+
+
+def get_page_links(soup: 'BeautifulSoup') -> dict:
     #Create a dictionary to store return values.
     page_links = {'next_page_link': '', 'last_page_link': '',
                   'next_page_num': 1, 'last_page_num': 1, 'records': ''}
@@ -730,7 +827,9 @@ def get_page_links(soup):
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
     return page_links
-def get_player_name(card_soup, card_data):
+
+
+def get_player_name(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
     class_name = 'pull-left paddingLeft10'
     #Get the official player_name.
     try:
@@ -740,7 +839,9 @@ def get_player_name(card_soup, card_data):
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
     return card_data
-def search_dealer_home(soup):
+
+
+def search_dealer_home(soup: 'BeautifulSoup'):
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
@@ -826,7 +927,9 @@ def search_dealer_home(soup):
         print('Something went wrong: {}'.format(err))
         print(len(li_list), 'li elements with className="title" were found.')
         print(len(a_list), 'a elements were found in li element #:', i, '.')
-def search_for_term(location, search_str, page_str):
+
+
+def search_for_term(location: str, search_str: str, page_str: str):
     #Create the url to search.
     url = (location + search_str + page_str)
 #function call---------------------------------------------------------------->
@@ -849,7 +952,9 @@ def search_for_term(location, search_str, page_str):
             soup = request_page(page_links['next_page_link'])
 #function call---------------------------------------------------------------->
             page_links = get_page_links(soup)
-def request_page(url):
+
+
+def request_page(url: str) -> 'BeautifulSoup':
     try:
         #Get the page requested.
         r = requests.get(url)
@@ -859,6 +964,8 @@ def request_page(url):
         return BeautifulSoup(c, 'lxml')
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
+
+
 def set_currency():
     url = ('https://www.beckett.com/home/update_currency_country')
     payload = {'currency': '1'}
@@ -876,6 +983,8 @@ def set_currency():
             print('The default currency should be USD.')
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
+
+
 #Connect to the inceff database.
 user = 'bk00chenb'
 password = 'NR8A*Ecb*'
@@ -890,7 +999,8 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-page = 1
+year = 2017
+page = 9
 card_start = 1
 card_end = 100
 debugging = False
@@ -907,10 +1017,8 @@ search_str = ('?term=')#Specific search term.
 page_str = ('&page=' + str(page))
 
 #Start the search.
-#search_for_term(dealer_home, search_str, page_str)
-for i in range(2017, 2018):
-    search_str += str(i)
-    search_for_term(dealer_home, search_str, page_str)
+search_str += str(year)
+search_for_term(dealer_home, search_str, page_str)
         
 cursor.close()
 cnx.close()
