@@ -595,6 +595,8 @@ def get_card_id(url: str, card_data: dict, page_num: int) -> dict:
                             + str(page_num))
             #If more than one is found there is a problem.
             elif len(temp_list) > 1:
+                #Print the link.
+                print(temp_str)
                 temp_str = str(len(temp_list))
                 temp_str += (' cards have the same number! '
                              'Which one should we use?')
@@ -1003,7 +1005,7 @@ cnx.commit()
 
 #Global variables.
 year = 2017
-page = 11
+page = 17
 card_start = 1
 card_end = 100
 debugging = False
