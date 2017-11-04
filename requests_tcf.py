@@ -8,6 +8,7 @@ Created on Sat Oct  7 2017
 import MySQLdb
 import requests
 import re
+import time
 from bs4 import BeautifulSoup
 
 def sql_insert_attribute(card_data: dict, index: int) -> None:
@@ -193,6 +194,14 @@ def sql_insert_set(card_data: dict) -> None:
               "brand_id, set_url) "
               "VALUES({set_id}, {set_year!r}, {set_name!r}, "
               "{manufacturer_id[0]}, {brand_id[0]}, {set_url!r})")
+    #If there is no manufacturer, remove the variables from insert.
+    if len(card_data['manufacturer_id']) < 1:
+        insert = insert.replace('manufacturer_id, ', '')
+        insert = insert.replace('{manufacturer_id[0]}, ', '')
+    #If there is no brand, remove the variables from insert.
+    if len(card_data['brand_id']) < 1:
+        insert = insert.replace('brand_id, ', '')
+        insert = insert.replace('{brand_id[0]}, ', '')
 #debugging-------------------------------------------------------------------->
     #print(insert.format(**card_data))
     try:
@@ -443,6 +452,7 @@ def sql_update_inventory(card_data: dict) -> None:
 
 def add_card_data(card_data: dict) -> None:
     try:
+        start_time = time.time()
         #Check to see if there is more than 1 brand_id.
         for index in range(0, len(card_data['brand_id'])):
             #Check to see if the brand has already been added.
@@ -543,6 +553,8 @@ def add_card_data(card_data: dict) -> None:
                 #If the card_attribute doesn't exist, insert it.
                 if(len(result) == 0):
                     sql_insert_card_attribute(card_data, index)
+        print('Sql insert statements took', round(time.time() - start_time, 2),
+              'seconds to run.')
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
 
@@ -810,7 +822,8 @@ def get_page_links(soup: 'BeautifulSoup') -> dict:
         page_links['records'] = int(temp_list[-1].strip())
 #debugging-------------------------------------------------------------------->
         if debugging:
-            print(page_links['records'], 'records were found.')        
+            print(page_links['records'], 'records were found for',
+                  str(year) + '.')        
         #Find the li element that holds the next page button.
         li_list = soup.find_all('li', 'next')
         if li_list != 0:
@@ -852,6 +865,7 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
         li_list = soup.find_all('li', 'title')
         #For each card, get the card_name, inventory_url, and inventory_id.
         for i in range(card_start - 1, card_end):
+            start_time = time.time()
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
                          'brand_url': list(),
@@ -872,6 +886,7 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
                          'attribute_name': list(), 'print_run': 0,
                          'card_url': '', 'inventory_url': ''
                          }
+            #Initialize list values.
             print('Card#:', i + 1)
             #Find the a element that contains the inventory_url.
             a_list = li_list[i].find_all('a')
@@ -887,7 +902,9 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
             temp_list2 = temp_list[0].split(' ')
             card_data['temp_year_name'] = temp_list2[0]
             temp_str = ' '.join(temp_list2[1:]).strip()
+            #Remove any special characters from the temp_set_name.
             card_data['temp_set_name'] = temp_str.replace("'", '')
+            card_data['temp_set_name'] = temp_str.replace("/", '')
             temp_list3 = temp_list[1].split(' ')
             card_data['temp_card_number'] = temp_list3[0]
             #Request the inventory_url page.
@@ -923,6 +940,8 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
                 card_data = get_card_url(card_soup, card_data)
                 #Add the card_data to the appropriate table.
 #function call---------------------------------------------------------------->
+                print('Scraping data for Card#', i + 1, 'took',
+                      round(time.time() - start_time, 2), 'seconds to run.')
                 add_card_data(card_data)
             elif len(result) > 1:
                 temp_str = 'More than one record was found for inventory_id: '
@@ -1004,8 +1023,8 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-year = 1973
-page = 20
+year = 1974
+page = 3
 card_start = 1
 card_end = 100
 debugging = False
