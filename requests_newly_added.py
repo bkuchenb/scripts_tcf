@@ -10,7 +10,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
-def sql_insert_attribute(card_data: dict, index: int):
+def sql_insert_attribute(card_data: dict, index: int) -> None:
     insert = ("INSERT INTO tcf_attribute(attribute_name) "
               "VALUES({attribute_name!r})")
 #debugging-------------------------------------------------------------------->
@@ -24,7 +24,7 @@ def sql_insert_attribute(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_brand(card_data: dict, index: int):
+def sql_insert_brand(card_data: dict, index: int) -> None:
 #Add the item if the number of ids and names matches.
     if(len(card_data['brand_id']) != len(card_data['brand_name'])):
         print("The number of ids and names doesn't match.")
@@ -44,7 +44,7 @@ def sql_insert_brand(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_card(card_data: dict):
+def sql_insert_card(card_data: dict) -> None:
     insert = ("INSERT INTO tcf_card"
               "(card_id, set_id, card_number, card_name, "
               "image_src_back, image_src_front, "
@@ -63,7 +63,7 @@ def sql_insert_card(card_data: dict):
         print(insert.format(**card_data))
 
 
-def sql_insert_card_attribute(card_data: dict, index: int):
+def sql_insert_card_attribute(card_data: dict, index: int) -> None:
     insert = ("INSERT INTO tcf_card_attribute(card_id, attribute_id) "
               "VALUES({card_id}, {attribute_id})")
 #debugging-------------------------------------------------------------------->
@@ -77,7 +77,7 @@ def sql_insert_card_attribute(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_card_player(card_data: dict, index: int):
+def sql_insert_card_player(card_data: dict, index: int) -> None:
     insert = ("INSERT INTO tcf_card_player(player_id, card_id) "
               "VALUES({player_id[" + str(index) + "]}, "
               "{card_id})")
@@ -92,7 +92,7 @@ def sql_insert_card_player(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_card_team(card_data: dict, index: int):
+def sql_insert_card_team(card_data: dict, index: int) -> None:
     insert = ("INSERT INTO tcf_card_team(team_id, card_id) "
               "VALUES({team_id[" + str(index) + "]}, "
               "{card_id})")
@@ -107,7 +107,7 @@ def sql_insert_card_team(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_category(card_data: dict, index: int):
+def sql_insert_category(card_data: dict, index: int) -> None:
     insert = ("INSERT INTO tcf_category"
               "(category_id, category_name, category_url) "
               "VALUES({category_id[" + str(index) + "]}, "
@@ -124,7 +124,7 @@ def sql_insert_category(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_inventory(card_data: dict):
+def sql_insert_inventory(card_data: dict) -> None:
     insert = ("INSERT INTO tcf_inventory(inventory_id, card_id, grade, "
               "quantity, max, min, price, inventory_url) "
               "VALUES({inventory_id}, {card_id}, {condition!r}, "
@@ -140,7 +140,7 @@ def sql_insert_inventory(card_data: dict):
         print(insert.format(**card_data))
 
 
-def sql_insert_manufacturer(card_data: dict, index: int):
+def sql_insert_manufacturer(card_data: dict, index: int) -> None:
     #Add the item if the number of ids and names matches.
     if(len(card_data['manufacturer_id'])
     != len(card_data['manufacturer_name'])):
@@ -162,7 +162,7 @@ def sql_insert_manufacturer(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_player(card_data: dict, index: int):
+def sql_insert_player(card_data: dict, index: int) -> None:
     #Add the item if the number of ids and names matches.
     if(len(card_data['player_id']) != len(card_data['player_name'])):
         print("The number of ids and names doesn't match.")
@@ -182,7 +182,7 @@ def sql_insert_player(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_set(card_data: dict):
+def sql_insert_set(card_data: dict) -> None:
     #Add the set to tcf_set if there is only one manufacturer and one brand.
     if(len(card_data['manufacturer_id']) > 1
        or len(card_data['brand_id']) > 1):
@@ -204,7 +204,7 @@ def sql_insert_set(card_data: dict):
         print(insert.format(**card_data))
 
 
-def sql_insert_set_category(card_data: dict, index: int):
+def sql_insert_set_category(card_data: dict, index: int) -> None:
     insert = ("INSERT INTO tcf_set_category(category_id, set_id) "
               "VALUES({category_id[" + str(index) + "]}, "
               "{set_id})")
@@ -219,7 +219,7 @@ def sql_insert_set_category(card_data: dict, index: int):
         print(insert.format(**card_data))
 
 
-def sql_insert_team(card_data: dict, index: int):
+def sql_insert_team(card_data: dict, index: int) -> None:
     #Add the item if the number of ids and names matches.
     if(len(card_data['team_id']) != len(card_data['team_name'])):
         print("The number of ids and names doesn't match.")
@@ -426,7 +426,7 @@ def sql_select_team(card_data: dict, index: int) -> list:
     return result
 
 
-def sql_update_inventory(card_data: dict):
+def sql_update_inventory(card_data: dict) -> None:
     update = ("UPDATE tcf_inventory "
               "Set quantity = {quantity}, price = {price} "
               "WHERE inventory_id = {inventory_id}")
@@ -441,7 +441,7 @@ def sql_update_inventory(card_data: dict):
         print(update.format(**card_data))
 
 
-def add_card_data(card_data: dict):
+def add_card_data(card_data: dict) -> None:
     try:
         #Check to see if there is more than 1 brand_id.
         for index in range(0, len(card_data['brand_id'])):
@@ -846,7 +846,7 @@ def get_player_name(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
     return card_data
 
 
-def search_dealer_home(soup: 'BeautifulSoup'):
+def search_dealer_home(soup: 'BeautifulSoup') -> None:
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
@@ -934,7 +934,7 @@ def search_dealer_home(soup: 'BeautifulSoup'):
         print(len(a_list), 'a elements were found in li element #:', i, '.')
 
 
-def search_for_term(location: str, search_str: str, page_str: str):
+def search_for_term(location: str, search_str: str, page_str: str) -> None:
     #Create the url to search.
     url = (location + search_str + page_str)
 #function call---------------------------------------------------------------->
@@ -971,7 +971,7 @@ def request_page(url: str) -> 'BeautifulSoup':
         print('Something went wrong: {}'.format(err))
 
 
-def set_currency():
+def set_currency() -> None:
     url = ('https://www.beckett.com/home/update_currency_country')
     payload = {'currency': '1'}
     try:
@@ -1004,8 +1004,8 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-year = 2017
-page = 17
+year = 1973
+page = 1
 card_start = 1
 card_end = 100
 debugging = False
