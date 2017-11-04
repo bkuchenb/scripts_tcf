@@ -452,7 +452,7 @@ def sql_update_inventory(card_data: dict) -> None:
 
 def add_card_data(card_data: dict) -> None:
     try:
-        start_time = time.time()
+#        start_time = time.time()
         #Check to see if there is more than 1 brand_id.
         for index in range(0, len(card_data['brand_id'])):
             #Check to see if the brand has already been added.
@@ -553,8 +553,8 @@ def add_card_data(card_data: dict) -> None:
                 #If the card_attribute doesn't exist, insert it.
                 if(len(result) == 0):
                     sql_insert_card_attribute(card_data, index)
-        print('Sql insert statements took', round(time.time() - start_time, 2),
-              'seconds to run.')
+#        print('Sql insert statements took',
+#              round(time.time() - start_time, 2), 'seconds to run.')
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
 
@@ -865,7 +865,7 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
         li_list = soup.find_all('li', 'title')
         #For each card, get the card_name, inventory_url, and inventory_id.
         for i in range(card_start - 1, card_end):
-            start_time = time.time()
+            #start_time = time.time()
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
                          'brand_url': list(),
@@ -940,8 +940,8 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
                 card_data = get_card_url(card_soup, card_data)
                 #Add the card_data to the appropriate table.
 #function call---------------------------------------------------------------->
-                print('Scraping data for Card#', i + 1, 'took',
-                      round(time.time() - start_time, 2), 'seconds to run.')
+#                print('Scraping data for Card#', i + 1, 'took',
+#                      round(time.time() - start_time, 2), 'seconds to run.')
                 add_card_data(card_data)
             elif len(result) > 1:
                 temp_str = 'More than one record was found for inventory_id: '
