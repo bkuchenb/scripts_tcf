@@ -4,11 +4,14 @@ Created on Sat Oct  7 2017
 
 @author: bk00chenb
 """
+import datetime
+import pprint
 
-import MySQLdb
-import requests
-import re
 from bs4 import BeautifulSoup
+import MySQLdb
+import re
+import requests
+
 
 def sql_insert_brand(card_data, index):
 #Add the item if the number of ids and names matches.
@@ -875,58 +878,98 @@ def set_currency():
             print('The default currency should be USD.')
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
-def request_orders():
-    #Log in to beckett.com.
-    url = 'https://www.beckett.com/login/'
-    payload = {'loginEmail': 'dialcard@nycap.rr.com',
-               'loginPassword': 'ruthmick'}
+def request_orders(page: str) -> dict:
+    """This function is used to log in to beckett.com and
+    get all the orders for a given time frame."""
     try:
+        #Log in to beckett.com.
+        url = 'https://www.beckett.com/login/'
+        login_token = ('DPI+iflC61Gmo2oDMvENkdFgiJvsZgNbOm76KJVQirCvB2ks169Zk'
+                       '60+h8Oq8Lhrz2xENd+goX/1OCh2+NpbVA==')
+        payload = {'login_token': login_token,
+                   'email': 'dialcard@nycap.rr.com',
+                   'password': 'ruthmick'}
         s = requests.Session()
-        r = s.post(url, data=payload)
-        #Request the orers page.
-        url = ('https://marketplace.beckett.com/admin/search_orders/')
-        #url = ('https://marketplace.beckett.com/mp_orders/ajax_get_orders_history')
-        payload = {'search': 'false', 'rows': 100,
-               'page': page, 'sidx': 'created', 'sord': 'desc',
-               'nd': '1509311640723', '_': '1509311640725'}
-        r = s.get(url)
-        #r = s.get(url, data=payload)
-        print(r.status_code)
-        print(r.headers['content-type'])
+        r = s.post(url, data = payload)
         
-#        data = r.json()
-#        print(data.keys())
+        #Get today's date.
+        today = datetime.date.today()
+        #Get the date for 28 days ago.
+        start_date = today - datetime.timedelta(days = 28)
+        #Get yesterday's date.
+        end_date = today - datetime.timedelta(days = 1)
+        #Save the two dates as strings.
+        start_date = start_date.strftime("%m/%d/%y").replace('/', '%2F')
+        end_date = end_date.strftime("%m/%d/%y").replace('/', '%2F')
+        
+        #Request the orders for the given date range.
+#        url = ('https://marketplace.beckett.com/mp_orders/'
+#               'ajax_get_orders_history')
+#        payload = {'order_id': '', 'name': '', 'email': '',
+#                   'add_date': start_date, 'modify_date': end_date,
+#                   'search_order_type': 1, '_search': 'false',
+#                   'nd': '1509528427489', 'rows': 100, 'page': page,
+#                   'sidx': 'created', 'sord': 'desc', '_': '1509528427491'}
+        url = ('https://marketplace.beckett.com/admin/search_orders/')
+        payload = {'order_id': '', 'name': '', 'email': '',
+                   'add_date': start_date, 'modify_date': end_date,
+                   'search_order_type': 1, '_search': 'false',
+                   'rows': 100, 'page': page,
+                   'sidx': 'created', 'sord': 'desc'}
+        r = s.post(url, data = payload)
+        if debugging:
+            print(r.status_code)
+            pp = pprint.PrettyPrinter(indent = 4,width = 20)
+            pp.pprint(r.headers)
+
         #Save the content.
         c = r.content
         #Parse the content.
         soup = BeautifulSoup(c, 'lxml')
-        table = soup.find_all('table')#id='orders_table'
-        print(len(table))
-        temp_list = soup.find_all(attrs={'aria-describedby':
-            'orders_table_order_id'})
+        dealer_name = soup.find_all(href=re.compile(
+                'https://www.beckett.com/users/dialacard'))
+        print(len(dealer_name), 'elements found with href=""')
+        if len(dealer_name) > 0:
+            print('Dealer Name:',dealer_name[1].text.strip())
+        table = soup.find_all(id='orders_table')
+        print(len(table), 'table elements found with id="orders_table"')
+        if table:
+            print(table[0].prettify())
+        else:
+            print('Table id="orders_table" not found.')
+        tr_list = soup.find_all('tr')
+        print(len(tr_list))
+#        temp_list = soup.find_all(attrs={'aria-describedby':
+#            'orders_table_order_id'})
+#        print(len(temp_list), ('elements found with class aria-describedby='
+#              '"orders_table_order_id"'))
+#        temp_list = soup.find_all(attrs={'role':
+#            'row'})
+#        print(len(temp_list), ('elements found with role="row"'))
         #print(soup.prettify)
     except requests.Timeout as err:
         print('Something went wrong: {}'.format(err))
 #Connect to the inceff database.
-user = 'bk00chenb'
-password = 'NR8A*Ecb*'
-host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
-database = 'inceff'
-cnx = MySQLdb.connect(user = user, password = password,
-                      host = host, database = database)
-#Create a cursor object to use for the database connection.
-cursor = cnx.cursor()
-#Set the autocommit to zero.
-cursor.execute('SET autocommit = 0')
-cnx.commit()
+# user = 'bk00chenb'
+# password = 'NR8A*Ecb*'
+# host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
+# database = 'inceff'
+# cnx = MySQLdb.connect(user = user, password = password,
+                      # host = host, database = database)
+# #Create a cursor object to use for the database connection.
+# cursor = cnx.cursor()
+# #Set the autocommit to zero.
+# cursor.execute('SET autocommit = 0')
+# cnx.commit()
 
 #Global variables.
 page = 1
-soup = request_orders()
 #card_start = 1
 #card_end = 100
-#debugging = False
-##debugging = True
+debugging = False
+debugging = True
+
+soup = request_orders(page)
 ##TCF marketplace dealer home.
 #dealer_home = ('https://marketplace.beckett.com/thecollectorsfriend_700/'
 #               'search_new/')
@@ -944,6 +987,6 @@ soup = request_orders()
     # search_str += str(i)
     # search_for_term(dealer_home, search_str, page_str)
         
-cursor.close()
-cnx.close()
+# cursor.close()
+# cnx.close()
 print('All records have been updated.')

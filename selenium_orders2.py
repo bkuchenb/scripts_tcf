@@ -5,23 +5,116 @@ Created on Sat Jul  2 18:29:02 2016
 @author: Brendan
 """
 
-#Import selenium which will control the web browser.
+import datetime
+import time
+
+import MySQLdb
+import pprint
 from selenium import webdriver
-#Import modules to force the browser to wait.
 from selenium.webdriver.support.ui import WebDriverWait
 
-#Import datetime to calculate different days.
-import datetime
-#Import the MySQLdb module to connect to the inceff database.
-import MySQLdb
-#Import sys and traceback for error debugging.
-import sys
-import traceback
-#Import time module to force the program to wait for web pages to load.
-import time
-#Import Beckett_Order_Downloader_Functions to process order info.
-from beckett_order_downloader_functions import format_item_description
-from beckett_order_downloader_functions import format_customer_info
+def sql_insert_customer(temp_dict: dict):           
+#Add the customer.
+    insert = ("INSERT INTO tcf_customer"
+              "(email_address, first_name, last_name, phone_number, "
+              "shipping_address) "
+              "VALUES({email_address!r}, {first_name!r}, {last_name!r}, "
+              "{phone_number!r}, {shipping_address!r})")
+#debugging-------------------------------------------------------------------->
+    #print(insert.format(**temp_dict))
+    try:
+        cursor.execute(insert.format(**temp_dict))
+        cnx.commit()
+        #Print a message indicating all cards were added.
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the statement.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**temp_dict))
+
+
+def sql_insert_order(temp_dict: dict):           
+#Add the order.
+    insert = ("INSERT INTO tcf_order"
+              "(order_id, email_address, order_date, order_time, "
+              "shipping, tax, total, order_url) "
+              "VALUES({order_id}, {email_address!r}, {order_date}, "
+              "{order_time}, {shipping}, {tax}, {total}, {order_url!r})")
+#debugging-------------------------------------------------------------------->
+    #print(insert.format(**temp_dict))
+    try:
+        cursor.execute(insert.format(**temp_dict))
+        cnx.commit()
+        print('Order', temp_dict['order_id'],
+              'was added to the tcf_order table.')
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the statement.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**temp_dict))
+
+
+def sql_insert_order_detail(temp_dict: dict):           
+#Add the order_detail.
+    insert = ("INSERT INTO tcf_order_detail"
+              "(order_id, inventory_id, quantity) "
+              "VALUES({order_id}, {inventory_id!r}, {quantity})")
+#debugging-------------------------------------------------------------------->
+    #print(insert.format(**temp_dict))
+    try:
+        cursor.execute(insert.format(**temp_dict))
+        cnx.commit()
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the statement.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**temp_dict))
+
+
+def sql_select_customer(temp_dict: dict) -> list:
+    select = ("SELECT email_address, shipping_address "
+              "FROM tcf_customer "
+              "WHERE email_address = {email_address!r}")
+#debugging-------------------------------------------------------------------->
+    #print(select.format(**temp_dict))
+    cursor.execute(select.format(**temp_dict))
+    #If the email was found, print a message.
+    if cursor.rowcount == 1:
+        print(temp_dict['first_name'], temp_dict['last_name'],
+              'has already been added.')
+#debugging-------------------------------------------------------------------->
+    #print(len(result), 'record(s) were found.')
+    return cursor.fetchall()
+
+
+def sql_select_order(temp_dict: dict) -> int:
+    select = "SELECT * FROM tcf_order WHERE order_id = {order_id}"
+#debugging-------------------------------------------------------------------->
+    #print(select.format(**temp_dict))
+    cursor.execute(select.format(**temp_dict))
+    #If the order_id was found, print a message.
+    if cursor.rowcount == 1:
+        print('Order', temp_dict['order_id'],
+              'has already been added.')
+#debugging-------------------------------------------------------------------->
+    #print(len(result), 'record(s) were found.')
+    return cursor.rowcount
+
+
+def sql_select_order_detail(temp_dict: dict) -> list:
+    select = "SELECT * FROM tcf_order_detail WHERE order_id = {order_id}"
+#debugging-------------------------------------------------------------------->
+    #print(select.format(**temp_dict))
+    cursor.execute(select.format(**temp_dict))
+    #If the order_id was found, print a message.
+    if cursor.rowcount > 0:
+        if cursor.rowcount == 1:
+            print('1 card was already added for order',
+                  temp_dict['order_id'] + '.')
+        else:
+            print(cursor.rowcount, 'cards were already added for order',
+                  temp_dict['order_id'] + '.')
+#debugging-------------------------------------------------------------------->
+    #print(len(result), 'record(s) were found.')
+    return cursor.fetchall()
+
 
 #Connect to inceff database.
 user = 'bk00chenb'
@@ -35,6 +128,9 @@ cursor = cnx.cursor()
 #Set the autocommit to zero.
 cursor.execute('SET autocommit = 0')
 cnx.commit()
+
+debugging = False
+debugging = True
 
 #Set the capabilites.
 browser = webdriver.Firefox()
@@ -50,10 +146,9 @@ end_date = today - datetime.timedelta(days = 1)
 #Save the two dates as strings.
 start_date = start_date.strftime("%m/%d/%y")
 end_date = end_date.strftime("%m/%d/%y")
-#Optional date range override##################################################
 #start_date = '04/01/2017'
 #end_date = '10/4/2016'
-#Optional date range override##################################################
+
 #Open the Beckett admin page.
 browser.get('https://www.beckett.com/login')
 #Find the loginEmail text box.
@@ -73,13 +168,13 @@ browser.get('http://marketplace.beckett.com/admin/search_orders')
 #Wait for the page to load.
 time.sleep(10)
 #Find the From Date text box.
-from_date = browser.find_element_by_id('add_date')
+add_date = browser.find_element_by_id('add_date')
 #Enter the start_date.
-from_date.send_keys(start_date)
+add_date.send_keys(start_date)
 #Find the To Date text box.
-to_date = browser.find_element_by_id('modify_date')
+modify_date = browser.find_element_by_id('modify_date')
 #Enter the end_date.
-to_date.send_keys(end_date)
+modify_date.send_keys(end_date)
 #Find the filter button.
 filter_btn = browser.find_element_by_id('formfilter')
 #Click the filter button.
@@ -89,275 +184,141 @@ filter_btn.click()
 time.sleep(5)
 #Find the number of pages.
 pages = browser.find_element_by_id('sp_1')
-print(pages.text)
+if pages.text == '1':
+    print(pages.text, 'page of orders was found.')
+else:
+    print(pages.text, 'pages of orders were found.')
 #If there is more than 1 page of records, change the number displayed.
 if pages.text != '1':
     #Find the drop down box.
-    select = browser.find_element_by_xpath("//select[@class=\"ui-pg-selbox\"]")
+    select = browser.find_element_by_xpath('//select[@class="ui-pg-selbox"]')
     #Save all the drop down box options.
-    all_options = select.find_elements_by_tag_name("option")
+    all_options = select.find_elements_by_tag_name('option')
     #Choose to display 100 records.
     all_options[3].click()
 #Wait for the page to load.
 time.sleep(10)
-#Find the orders table.
+
+#Find and save all the order and customer data.
 orders_table = browser.find_element_by_id('orders_table')
-#Find the tbody element in the orders table.
 tbody = orders_table.find_element_by_tag_name('tbody')
-#Find all the rows in the tbody.
 tr_list = tbody.find_elements_by_tag_name('tr')
-print(len(tr_list))
-#Find and save all order IDs.
-orderIds = browser.find_elements_by_xpath('//td[@aria-describedby=' 
-                                         + '\"orders_table_order_id\"]')
-#Find and save all order dates.
-purchaseDate = browser.find_elements_by_xpath('//td[@aria-describedby='
-                                             + '\"orders_table_created\"]')
-#Find and save all email addresses.
-email = browser.find_elements_by_xpath('//td[@aria-describedby='
-                                      + '\"orders_table_email\"]')
-#Find and save all first names.
-firstName = browser.find_elements_by_xpath('//td[@aria-describedby='
-                                          + '\"orders_table_first_name\"]')
-#Find and save all last names.
-lastName = browser.find_elements_by_xpath('//td[@aria-describedby='
-                                         + '\"orders_table_last_name\"]')
+if debugging:
+    print(len(tr_list), 'rows were found in the orders table.')
+#Find and save all order_id(s).
+temp_str = '//td[@aria-describedby="orders_table_order_id"]'
+order_id_list = browser.find_elements_by_xpath(temp_str)
+temp_str = '//td[@aria-describedby="orders_table_created"]'
+order_date_list = browser.find_elements_by_xpath(temp_str)
+#Find and save all email_addresse(s).
+temp_str = '//td[@aria-describedby="orders_table_email"]'
+email_address_list = browser.find_elements_by_xpath(temp_str)
+#Find and save all first_name(s).
+temp_str = '//td[@aria-describedby="orders_table_first_name"]'
+first_name_list = browser.find_elements_by_xpath(temp_str)
+#Find and save all last_name(s).
+temp_str = '//td[@aria-describedby="orders_table_last_name"]'
+last_name_list = browser.find_elements_by_xpath(temp_str)
+#Find and save all order_url(s).
+order_url_list = list()
+temp_str = '//td[@aria-describedby="orders_table_actions"]'
+temp_list = browser.find_elements_by_xpath(temp_str)
+for row in temp_list:
+    temp_a = row.find_element_by_tag_name('a')
+    order_url_list.append(temp_a.get_attribute('href'))
+if debugging:
+    print(len(order_id_list), len(order_date_list), len(email_address_list), 
+          len(first_name_list), len(last_name_list), len(order_url_list))
 #Create a list to hold the order information.
-orderList = list()
+order_list = list()
+
 #Cycle through a range to get the same element for the previous lists.
-for x in range(0, len(orderIds)):
-    #Create a list to store data for a particlular order
-    temp = list()
-    temp.append(orderIds[x].text)##########list position 0 - orderID
-    temp.append(purchaseDate[x].text[:10])#list position 1 - date
-    temp.append(purchaseDate[x].text[11:])#list position 2 - time
-    temp.append(email[x].text.lower())#############list position 3 - email
-    temp.append(firstName[x].text.title())#########list position 4 - firstName
-    temp.append(lastName[x].text.title())##########list position 5 - lastName
+for x in range(0, len(order_id_list)):
+    #Create a dict to store data for a particlular order.
+    temp_dict = {}
+    temp_dict['order_id'] = order_id_list[x].text.strip()
+    temp_dict['order_date'] = order_date_list[x].text[:10].strip()
+    temp_dict['order_time'] = order_date_list[x].text[11:].strip()
+    temp_dict['email_address'] = email_address_list[x].text.strip().lower()
+    temp_dict['first_name'] = first_name_list[x].text.strip().title()
+    temp_dict['last_name'] = last_name_list[x].text.strip().title()
+    temp_dict['order_url'] = order_url_list[x]
     #Add the order info to the order list.
-    orderList.append(temp)
+    order_list.append(temp_dict)
 
-#Print a message indicating how many orders were found
-print(len(orderIds), 'were found between', start_date, 'and', end_date + '.')
-print()
-#Cycle through the order IDs and query the tables.
-for x in range(0, len(orderList)):
-    #Create 3 variable to save query results.
-    in_orders_table = False
-    in_orderdetails_table = False
-    in_customers_table = False
-    try:
-        #Check the orders table.
-        query = ('SELECT * FROM tcf_orders WHERE orderID = "{0}"')
-        query = query.format(orderList[x][0])
-        cursor.execute(query)
-        cursor.fetchone()
-        #If the order ID was found, print a message.
-        if cursor.rowcount == 1:
-            in_orders_table = True
-            print('Order ' + orderList[x][0] + ' has already been added.')
-        #Check the orderDetails table.
-        query = ('SELECT * FROM tcf_orderdetails WHERE orderID = "{0}"')
-        query = query.format(orderList[x][0])
-        cursor.execute(query)
-        cursor.fetchall()
-        #If the order ID was found, print a message.
-        if cursor.rowcount > 0:
-            in_orderdetails_table = True
-            if cursor.rowcount == 1:
-                print(cursor.rowcount, 'card was already added for '
-                     + 'order', orderList[x][0] + '.')
-            else:
-                print(cursor.rowcount, 'cards were already added for '
-                     + 'order', orderList[x][0] + '.')
-        #Check the customers table.
-        query = ('SELECT * FROM tcf_customers WHERE email = "{0}"')
-        query = query.format(orderList[x][3])
-        cursor.execute(query)
-        cursor.fetchone()
-        #If the email was found, print a message.
-        if cursor.rowcount == 1:
-            in_customers_table = True
-            print(orderList[x][4], orderList[x][5], 'has already been added.')
-    except MySQLdb.Error as err:
-        print("Something went wrong: {}".format(err))
-        print(query)
-        input("Press Enter to continue...")
+#Print a message indicating how many orders were found.
+print(len(order_id_list), ' orders were found between', start_date,
+      'and', end_date + '.\n')
 
-    #If the order Id or email was not found, process the order.
-    if(in_orders_table == False or in_orderdetails_table == False or
-       in_customers_table == False):
-        #Build the order's web address and open the site.
-        linkName = ('http://marketplace.beckett.com'
-                   + '/admin/search_orders/view/' + orderList[x][0])
-        #Open the order.
-        browser.get(linkName)
-        
-        #Find and save the element that contains customer info.
-        customer_info = browser.find_elements_by_xpath('//div[@style='
-                                         + '\"padding: 10px;\"]')
-        #Find all the card info contained in td elements.
-        tableRows = browser.find_elements_by_tag_name('td')
-        #Create a list to store the card info.
-        cardInfo = list()
-        #Create a counter to track the card info being processed.
-        counter = 0
-        #Create a flag to tell if the last card has been read.
-        lastCard = False
-        #Cycle through each td element in the card info table.
-        for row in tableRows:
-            #Update the counter.
-            counter += 1
-            if lastCard == False:
-                if counter == 1:
-                    #If row 1 does not contain 'Shipping', save the item ID.
-                    #Otherwise, set lastCard flag to True and add the
-                    #card info list to the order list.
-                    if 'Shipping' not in row.text:
-                        itemID = row.text[:8]
-                    else:
-                        lastCard = True
-                        orderList[x].append(cardInfo)#line position 6
-                if counter == 2:
-                    #Row 2 contains the item description.
-                    #Call function to extract each piece
-                    itemDesc = format_item_description(row.text)
-                if counter == 3:
-                    #Row 3 contains the condition.
-                    cond = row.text 
-                if counter == 4:
-                    #Row 4 contains the sport.
-                    sport = row.text
-                if counter == 7:
-                    #Row 7 contains the quantity purchased.
-                    qty = row.text
-                if counter == 8:
-                    #Row 8 contains the price of each card.
-                    price = row.text[1:]
-                if counter == 9:
-                    #Row 9 contains the total (quantity * price)
-                    total = row.text[1:]
-                    #Reset the counter and add each detail
-                    #to the card info list.
-                    counter = 0
-                    cardInfo.append([itemID, sport, itemDesc[0], itemDesc[1],
-                                     itemDesc[2], itemDesc[3], cond, qty,
-                                     price, total, itemID])
-            else:               
-                if counter == 3:
-                    #Row 3 (after all card info) contains shipping cost.
-                    #Add shiping to the order list.
-                    shipping = float(row.text[1:])
-                    orderList[x].append(shipping)#line position 7 - shipping
-                if counter == 6:
-                    #Row 3 (after all card info) contains the tax paid
-                    tax = float(row.text[1:])
-                    #Add tax to the order list.
-                    orderList[x].append(tax)#line position 8 - tax
-                if counter == 9:
-                    #Row 9 could be the total or a discount applied.
-                    #Check for (-) which indicates the discount.
-                    if '(-)' not in row.text:
-                        #Subtract shipping and tax to get the total.
-                        total = float(row.text[1:]) - shipping - tax
-                        #Add the total to the order list.
-                        orderList[x].append(total)#line position 9 - total
-#                    else:
-#                        promo = row.text[4:]
-                if counter == 12:
-                    #If there was a discount row 12 contains the total
-                    total = float(row.text[1:]) - shipping - tax
-                    orderList[x].append(total)#line position 8 - total
+#Check to see if the order, order_detail, and customer already exist.
+for x in range(0, len(order_list)):
+    #Open the order.
+    browser.get(order_list[x]['order_url'])
+    #Create a list to store card_data.
+    card_list = list()
+    #Find all the card_url links and quantities.
+    desc_list = browser.find_elements_by_css_selector('td.description')
+    qty_list = browser.find_elements_by_css_selector('td.qty')
+    if debugging:
+        print(len(desc_list), 'card_url cells were found.')
+        print(len(qty_list), 'qty cells were found.')
+    #Add the information to card_data.
+    for i in range(0, len(qty_list)):
+        #Create a dict to store the card_data.
+        card_data = {}
+        #Find and save the card_url.
+        temp_a = desc_list[i].find_element_by_tag_name('a')
+        card_data['card_url'] = temp_a.get_attribute('href')
+        #Get the inventory_id from the card_url.
+        temp_list = card_data['card_url'].split('_')
+        card_data['inventory_id'] = temp_list[-1]
+        #Save the quantity purchased.
+        card_data['quantity'] = qty_list[i].text.strip()
+        #Add the card_data to the card_list.
+        card_list.append(card_data)
+    #Find the shipping, tax, and total.
+    temp_str = '//td[@colspan="2"]'
+    td_list = browser.find_elements_by_xpath(temp_str)
+    order_list[x]['shipping'] = float(td_list[0].text[1:])
+    order_list[x]['tax'] = float(td_list[1].text[1:])
+    if len(td_list) == 3:
+        temp_float = float(td_list[2].text[1:])
+    if len(td_list) == 4:
+        temp_float = float(td_list[3].text[1:])
+    temp_float -= (order_list[x]['shipping'] + order_list[x]['tax'])
+    order_list[x]['total'] = temp_float
 
-    #Update the orders table if needed.
-    if(in_orders_table == False):
-        try:
-            #Create the query and update the orders table.
-            query = ('INSERT INTO tcf_orders(orderID, email, added, date, time, '
-                    + 'shipping, tax, total) VALUES("{0}", "{1}", "{2}", '
-                    + '"{3}", "{4}", "{5}", "{6}", "{7}")')
-            query = query.format(orderList[x][0], orderList[x][3], 1,
-                                 orderList[x][1], orderList[x][2],
-                                 orderList[x][7], orderList[x][8],
-                                 orderList[x][9])
-            cursor.execute(query)   
-            cnx.commit()
-            #Print a message indicating the order was added.
-            print('Order', orderList[x][0], 'was added to the orders '
-                 + 'table.')
-        except MySQLdb.Error as err:
-            #If the update fails, print a message and the query.
-            print("Something went wrong: {}".format(err))
-            print('Order', orderList[x][0], 'was not added!')
-            print(query)
-            input("Press Enter to continue...")
+    #Find and save the phone_number.
+    temp_str = '//div[@style="padding: 10px;"]'
+    div_list = browser.find_elements_by_xpath(temp_str)
+    temp_p = div_list[0].find_element_by_tag_name('p')
+    temp_list = temp_p.text.split('Phone Number:')
+    order_list[x]['phone_number'] = temp_list[-1].strip()
+    #Find and save the shipping information.
+    temp_p = div_list[1].find_element_by_tag_name('p')
+    order_list[x]['shipping_address'] = temp_p.text
+    if debugging:
+        pprint.pprint(order_list[x])
+        #Check to see if the order has been added.
+    if sql_select_order(order_list[x]) == 0:
+        sql_insert_order(order_list[x])
+    #Check to see if all the cards in the order have been added.
+    result = sql_select_order_detail(order_list[x])
+    if debugging:
+        print(len(result), 'cards found in order_details.')
+        print(len(card_list), 'cards to be added.')
+    #If no cards have been added, add the cards from card_list.
+    if len(result) == 0:
+        for row in card_list:
+            sql_insert_order_detail(row)
+    #If some, but not all, cards were added, add those missing.
+    elif len(result) != len(card_list):
+        for row in card_list:
+            if row['inventory_id'] in result
+            sql_insert_order_detail(row)
+    if sql_select_customer(order_list[x]) == 0:
+        sql_insert_customer(order_list[x])
 
-    #Update the orderdetails table if needed.
-    if(in_orderdetails_table == False):
-        #Cycle through the cards in each order.
-        for card in orderList[x][6]:
-            try:
-                #Create the query and update the orderdetails table.
-                query = ('INSERT INTO tcf_orderdetails(itemID, sport, year, '
-                        + 'setName, cardNumber, cardName, cond, qty, '
-                        + 'price, total, orderID) VALUES("{0}", "{1}", '
-                        + '"{2}", "{3}", "{4}", "{5}", "{6}", "{7}", '
-                        + '"{8}", "{9}", "{10}")')
-                query = query.format(card[0], card[1], card[2], card[3],
-                                     card[4], cnx.escape_string(card[5]),
-                                     card[6], card[7], card[8], card[9],
-                                     orderList[x][0])
-                cursor.execute(query)
-            except MySQLdb.Error as err:
-                print("Something went wrong: {}".format(err))
-                for frame in traceback.extract_tb(sys.exc_info()[2]):
-                    fname,lineno,fn,text = frame
-                    print (("Error in {0} on line {1}").format(fname, lineno))
-        #Commit the insert statements.
-        cnx.commit()
-        #Print a message indicating all cards were added.
-        if len(orderList[x][6]) == 1:
-            print(len(orderList[x][6]), 'card was added for order '
-                 + orderList[x][0] + '.')
-        if len(orderList[x][6]) > 1:
-            print(len(orderList[x][6]), 'cards were added for order '
-                 + orderList[x][0] + '.')
-
-    #Update the customers table if needed.
-    if(in_customers_table == False):
-        #Create a list to hold customer info
-        customerInfo = list()
-        #Cycle through the elements in customer_info.
-        for element in customer_info:
-            if 'Phone Number' in element.text:
-                customerInfo = format_customer_info(element.text, customerInfo)
-            if 'Address' in element.text:
-                customerInfo = format_customer_info(element.text, customerInfo)
-        try:
-            #Create the query and update the customers table.
-            query = ('INSERT INTO tcf_customers(email, added, firstName, '
-                    + 'lastName, phone, shipTo, address, city, '
-                    + 'state, zipcode, country) VALUES("{0}", "{1}", '
-                    + '"{2}", "{3}", "{4}", "{5}", "{6}", "{7}", '
-                    + '"{8}", "{9}", "{10}")')
-            query = query.format(orderList[x][3], 1, orderList[x][4],
-                                orderList[x][5], customerInfo[0],
-                                customerInfo[1], customerInfo[2],
-                                customerInfo[3], customerInfo[4],
-                                customerInfo[5], customerInfo[6])
-            cursor.execute(query)
-            cnx.commit()
-            #Print a message indicating all cards were added.
-            print(orderList[x][4], orderList[x][5],
-                  'was added to the customers table.')
-        except MySQLdb.Error as err:
-            #If the update fails, print a message and the query.
-            print("Something went wrong: {}".format(err))
-            print('Details for order', orderList[x][0],
-                  'were not added!')
-            print(query)
-            input("Press Enter to continue...")
-    print()
 cursor.close()
 cnx.close()
 browser.close()
