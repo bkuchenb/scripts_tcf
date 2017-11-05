@@ -868,6 +868,8 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
+        if not bool(card_end):
+            card_end = len(li_list)
         #For each card, get the card_name, inventory_url, and inventory_id.
         for i in range(card_start - 1, card_end):
             #start_time = time.time()
@@ -1025,6 +1027,9 @@ host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
 database = 'inceff'
 cnx = MySQLdb.connect(user = user, password = password,
                       host = host, database = database)
+#Override for ubuntu.
+#cnx = MySQLdb.connect(user = user, passwd = password,
+#                      host = host, db = database)
 #Create a cursor object to use for the database connection.
 cursor = cnx.cursor()
 #Set the autocommit to zero.
@@ -1032,10 +1037,10 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-year = 2017
-page = 29
+year = input('Enter the year search term: ')
+page = input('Enter the start page: ')
 card_start = 1
-card_end = 100
+card_end = ''
 debugging = False
 #debugging = True
 #TCF marketplace dealer home.
