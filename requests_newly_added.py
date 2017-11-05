@@ -124,6 +124,19 @@ def sql_insert_category(card_data: dict, index: int) -> None:
         print(insert.format(**card_data))
 
 
+def sql_insert_exception(card_data: dict) -> None:
+    insert = ("INSERT INTO tcf_exception(card_data) "
+              "VALUES({card_name!r})")
+#debugging-------------------------------------------------------------------->
+    print(insert.format(**card_data))
+    try:
+        cursor.execute(insert.format(**card_data))
+        cnx.commit()
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the query.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**card_data))
+
 def sql_insert_inventory(card_data: dict) -> None:
     insert = ("INSERT INTO tcf_inventory(inventory_id, card_id, grade, "
               "quantity, max, min, price, inventory_url) "
@@ -595,22 +608,14 @@ def get_card_id(url: str, card_data: dict, page_num: int) -> dict:
                             + str(page_num))
             #If more than one is found there is a problem.
             elif len(temp_list) > 1:
-                #Print the link.
-                print(temp_str)
                 temp_str = str(len(temp_list))
-                temp_str += (' cards have the same number! '
-                             'Which one should we use?')
-                index = int(input(temp_str))
-                #Save the link.
-                card_data['card_url'] = temp_list[index]['href']
-                print(card_data['card_url'])
-                #Get the card_id
-                temp_list = temp_list[index]['href'].split('-')
-                card_data['card_id'] = temp_list[-1]
-                print(card_data['card_id'])
+                temp_str += (' cards have the same number!')
+                print(temp_str)
                 return card_data
             #Request the next page.
             soup = request_page(temp_url)
+        #Return the card_data even if no match was found.
+        return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
 
@@ -916,6 +921,11 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
 #function call---------------------------------------------------------------->
                 #Get the set_id and card_id.
                 card_data = get_card_id(url, card_data, page_num)
+                #Move to the next card if the card_url wasn't found.
+                if not bool(card_data['card_url']):
+#function call---------------------------------------------------------------->
+                    sql_insert_exception(card_data)                    
+                    continue
                 #Get more information from the card_url.
 #function call---------------------------------------------------------------->
                 card_soup = request_page(card_data['card_url'])
@@ -1004,8 +1014,8 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-year = 1973
-page = 20
+year = 2017
+page = 26
 card_start = 1
 card_end = 100
 debugging = False
