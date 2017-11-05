@@ -136,7 +136,7 @@ def sql_insert_exception(card_data: dict) -> None:
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the query.
         print('Something went wrong: {}'.format(err))
-        print(insert.format(**card_data))
+
 
 def sql_insert_inventory(card_data: dict) -> None:
     insert = ("INSERT INTO tcf_inventory(inventory_id, card_id, grade, "
