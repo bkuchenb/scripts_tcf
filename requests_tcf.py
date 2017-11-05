@@ -868,10 +868,10 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
     #Get all the card names that are displayed.
     try:
         li_list = soup.find_all('li', 'title')
-        if not bool(card_end):
-            card_end = len(li_list)
         #For each card, get the card_name, inventory_url, and inventory_id.
         for i in range(card_start - 1, card_end):
+            if i == len(li_list):
+                break
             #start_time = time.time()
             #Create a dictionary to store return values.
             card_data = {'brand_id': list(), 'brand_name': list(),
@@ -909,8 +909,8 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
             card_data['temp_year_name'] = temp_list2[0]
             temp_str = ' '.join(temp_list2[1:]).strip()
             #Remove any special characters from the temp_set_name.
-            card_data['temp_set_name'] = temp_str.replace("'", '')
-            card_data['temp_set_name'] = temp_str.replace("/", '')
+            temp_str = temp_str.replace('\'', '')
+            card_data['temp_set_name'] = temp_str.replace('/', '')
             temp_list3 = temp_list[1].split(' ')
             card_data['temp_card_number'] = temp_list3[0]
             #Request the inventory_url page.
@@ -1037,10 +1037,12 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-year = int(input('Enter the year search term: '))
-page = int(input('Enter the start page: '))
+#year = int(input('Enter the year search term: '))
+#page = int(input('Enter the start page: '))
+year = 2017
+page = 33
 card_start = 1
-card_end = ''
+card_end = 100
 debugging = False
 #debugging = True
 #TCF marketplace dealer home.
