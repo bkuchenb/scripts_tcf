@@ -870,6 +870,7 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
         li_list = soup.find_all('li', 'title')
         #For each card, get the card_name, inventory_url, and inventory_id.
         for i in range(card_start - 1, card_end):
+            #Stop the loop if there fewer cards than card_end.
             if i == len(li_list):
                 break
             #start_time = time.time()
