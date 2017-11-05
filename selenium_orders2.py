@@ -13,7 +13,7 @@ import pprint
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
-def sql_insert_customer(temp_dict: dict):           
+def sql_insert_customer(temp_dict: dict) -> None:           
 #Add the customer.
     insert = ("INSERT INTO tcf_customer"
               "(email_address, first_name, last_name, phone_number, "
@@ -24,15 +24,17 @@ def sql_insert_customer(temp_dict: dict):
     #print(insert.format(**temp_dict))
     try:
         cursor.execute(insert.format(**temp_dict))
-        cnx.commit()
-        #Print a message indicating all cards were added.
+        #cnx.commit()
+        #Print a message indicating the customer was added.
+        print(temp_dict['first_name'], temp_dict['last_name'],
+        'has been added.')
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the statement.
         print('Something went wrong: {}'.format(err))
         print(insert.format(**temp_dict))
 
 
-def sql_insert_order(temp_dict: dict):           
+def sql_insert_order(temp_dict: dict) -> None:           
 #Add the order.
     insert = ("INSERT INTO tcf_order"
               "(order_id, email_address, order_date, order_time, "
@@ -43,7 +45,7 @@ def sql_insert_order(temp_dict: dict):
     #print(insert.format(**temp_dict))
     try:
         cursor.execute(insert.format(**temp_dict))
-        cnx.commit()
+        #cnx.commit()
         print('Order', temp_dict['order_id'],
               'was added to the tcf_order table.')
     except MySQLdb.Error as err:
@@ -52,7 +54,7 @@ def sql_insert_order(temp_dict: dict):
         print(insert.format(**temp_dict))
 
 
-def sql_insert_order_detail(temp_dict: dict):           
+def sql_insert_order_detail(temp_dict: dict) -> None:       
 #Add the order_detail.
     insert = ("INSERT INTO tcf_order_detail"
               "(order_id, inventory_id, quantity) "
@@ -61,7 +63,28 @@ def sql_insert_order_detail(temp_dict: dict):
     #print(insert.format(**temp_dict))
     try:
         cursor.execute(insert.format(**temp_dict))
-        cnx.commit()
+        #cnx.commit()
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the statement.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**temp_dict))
+
+
+def sql_insert_shipping_address(temp_dict: dict) -> None:           
+#Add the customer.
+    insert = ("INSERT INTO tcf_shipping_address"
+              "(email_address, first_name, last_name, "
+              "shipping_address) "
+              "VALUES({email_address!r}, {first_name!r}, {last_name!r}, "
+              "{shipping_address!r})")
+#debugging-------------------------------------------------------------------->
+    #print(insert.format(**temp_dict))
+    try:
+        cursor.execute(insert.format(**temp_dict))
+        #cnx.commit()
+        #Print a message indicating the customer was added.
+        print(temp_dict['first_name'], temp_dict['last_name'],
+        'has been added.')
     except MySQLdb.Error as err:
         #If the insert fails, print a message and the statement.
         print('Something went wrong: {}'.format(err))
@@ -114,6 +137,41 @@ def sql_select_order_detail(temp_dict: dict) -> list:
 #debugging-------------------------------------------------------------------->
     #print(len(result), 'record(s) were found.')
     return cursor.fetchall()
+
+
+def sql_select_shipping_address(temp_dict: dict) -> int:
+    select = ("SELECT email_address, shipping_address "
+              "FROM tcf_shipping_address "
+              "WHERE email_address = {email_address!r} "
+              "AND shipping_address = {shipping_address!r}")
+#debugging-------------------------------------------------------------------->
+    #print(select.format(**temp_dict))
+    cursor.execute(select.format(**temp_dict))
+    #If the email was found, print a message.
+    if cursor.rowcount == 1:
+        print('This shipping address has already been added.')
+#debugging-------------------------------------------------------------------->
+    #print(len(result), 'record(s) were found.')
+    return cursor.rowcount
+
+
+def sql_update_customer(temp_dict: dict) -> None:           
+#Add the customer.
+    insert = ("UPDATE tcf_customer"
+              "SET shipping_address = {shipping_address!r} "
+              "WHERE email_address = {email_address!r}")
+#debugging-------------------------------------------------------------------->
+    #print(insert.format(**temp_dict))
+    try:
+        cursor.execute(insert.format(**temp_dict))
+        #cnx.commit()
+        #Print a message indicating the shipping address was updated.
+        print('The shipping address has been updated for',
+        temp_dict['first_name'], temp_dict['last_name'])
+    except MySQLdb.Error as err:
+        #If the insert fails, print a message and the statement.
+        print('Something went wrong: {}'.format(err))
+        print(insert.format(**temp_dict))
 
 
 #Connect to inceff database.
@@ -305,19 +363,25 @@ for x in range(0, len(order_list)):
     #Check to see if all the cards in the order have been added.
     result = sql_select_order_detail(order_list[x])
     if debugging:
-        print(len(result), 'cards found in order_details.')
-        print(len(card_list), 'cards to be added.')
+        print(len(result), 'cards were found in order_detail.')
+        print(len(card_list), 'cards need to be added.')
     #If no cards have been added, add the cards from card_list.
     if len(result) == 0:
         for row in card_list:
+            #Add the order_id to the dict.
+            row['order_id'] = order_list[x]['order_id']
             sql_insert_order_detail(row)
-    #If some, but not all, cards were added, add those missing.
-    elif len(result) != len(card_list):
-        for row in card_list:
-            if row['inventory_id'] in result
-            sql_insert_order_detail(row)
-    if sql_select_customer(order_list[x]) == 0:
+    #Add the customer if they aren't in the table.
+    result = sql_select_customer(order_list[x])
+    if len(result) == 0:
         sql_insert_customer(order_list[x])
+    #Update the shipping_address if null.
+    if not bool(result[0][1]):
+        sql_update_customer(order_list[x])
+    #Add the shipping_address to tcf_shipping_address if needed.
+    if order_list[x]['shipping_address'] != result[0][1]:
+        if sql_select_shipping_address(order_list[x]) == 0:
+            sql_insert_shipping_address(order_list[x])
 
 cursor.close()
 cnx.close()
