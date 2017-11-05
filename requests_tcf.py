@@ -1037,8 +1037,8 @@ cursor.execute('SET autocommit = 0')
 cnx.commit()
 
 #Global variables.
-year = input('Enter the year search term: ')
-page = input('Enter the start page: ')
+year = int(input('Enter the year search term: '))
+page = int(input('Enter the start page: '))
 card_start = 1
 card_end = ''
 debugging = False
