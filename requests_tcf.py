@@ -873,12 +873,10 @@ def search_for_term(location: str, search_str: str, page_str: str) -> None:
     soup = request_page(url)
     # Get the next and last page links.
     page_links = get_page_links(soup)
-    if page_links['records'] > 10000:
-        print('This search will need to be refined.')
-        print('There are more than 10,000 records.')
+    print('There are', page_links['records'], 'records for', year)
     # Cycle through the pages and scrape each page.
     for x in range(page - 1, page_links['last_page_num']):
-        print('Page', x + 1)
+        print('Year:', year, 'Page:', x + 1)
         # Set the default currency.
         set_currency()
         search_dealer_home(soup)
@@ -904,14 +902,13 @@ def set_currency() -> None:
     payload = {'currency': '1'}
     try:
         r = requests.post(url, data=payload)
-        print(r.status_code)
         # Save the content.
         c = r.content
         # Parse the content.
         soup = BeautifulSoup(c, 'lxml')
         # Check the active currency.
         span_list = soup.find_all('span', 'currency')
-        print('Currency:', span_list[0].text)
+#        print('Currency:', span_list[0].text)
         if(span_list[0].text != 'USD'):
             print('The default currency should be USD.')
     except requests.Timeout as err:
@@ -938,7 +935,7 @@ cnx.commit()
 # year = int(input('Enter the year search term: '))
 # page = int(input('Enter the start page: '))
 year = 2017
-page = 33
+page = 78
 card_start = 1
 card_end = 100
 debugging = False
