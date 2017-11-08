@@ -540,10 +540,10 @@ def get_card_id(url: str, card_data: dict, page_num: int) -> dict:
                 return card_data
             # Request the next page.
             soup = request_page(temp_url)
-        # Return the card_data even if no match was found.
-        return card_data
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
+    # Return the card_data even if no match was found.
+    return card_data
 
 
 def get_card_url(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
@@ -821,6 +821,7 @@ def search_dealer_home(soup: 'BeautifulSoup') -> None:
             temp_str = ' '.join(temp_list2[1:]).strip()
             # Remove any special characters from the temp_set_name.
             temp_str = temp_str.replace('\'', '')
+            temp_str = temp_str.replace('.', '')
             card_data['temp_set_name'] = temp_str.replace('/', '')
             temp_list3 = temp_list[1].split(' ')
             card_data['temp_card_number'] = temp_list3[0]
@@ -934,8 +935,8 @@ cnx.commit()
 # Global variables.
 # year = int(input('Enter the year search term: '))
 # page = int(input('Enter the start page: '))
-year = 2017
-page = 78
+year = 2016  # '2016+B%2A'
+page = 1
 card_start = 1
 card_end = 100
 debugging = False
