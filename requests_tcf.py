@@ -921,11 +921,8 @@ user = 'bk00chenb'
 password = 'NR8A*Ecb*'
 host = 'inceff.ctlel9cvjtqf.us-west-2.rds.amazonaws.com'
 database = 'inceff'
-cnx = MySQLdb.connect(user=user, password=password,
-                      host=host, database=database)
-# Override for ubuntu.
-# cnx = MySQLdb.connect(user=user, passwd=password,
-#                      host=host, db=database)
+cnx = MySQLdb.connect(user=user, passwd=password,
+                      host=host, db=database)
 # Create a cursor object to use for the database connection.
 cursor = cnx.cursor()
 # Set the autocommit to zero.
@@ -935,8 +932,8 @@ cnx.commit()
 # Global variables.
 # year = int(input('Enter the year search term: '))
 # page = int(input('Enter the start page: '))
-year = 2016  # '2016+B%2A'
-page = 1
+year = 2015  # '2016+B%2A'
+page = 62
 card_start = 1
 card_end = 100
 debugging = False
