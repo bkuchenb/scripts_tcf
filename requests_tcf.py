@@ -631,14 +631,11 @@ def get_inventory_url(card_soup: 'BeautifulSoup', card_data: dict) -> dict:
                 # Remove the title and discount rate.
                 temp_str = temp_str.replace('Price:', '').strip()
                 temp_str = temp_str.replace('xx% off Beckett Value', '')
-                temp_str = temp_str.strip()
-                # Check to see if a Canadian price is present.
-                if 'CAD' in temp_str:
-                    temp_list = temp_str.split('CAD')
-                    card_data['price'] = float(temp_list[0].replace('$', ''))
-                else:
-                    card_data['price'] = float(temp_str.replace('$', ''))
-                    break
+                temp_str = temp_str.strip().replace('$', '')
+                # Find the location of the period.
+                index = temp_str.index('.')
+                card_data['price'] = float(temp_str[:index + 3])
+                break
     except IndexError as err:
         print('Something went wrong: {}'.format(err))
     # Get the div that contains the grade data.
@@ -932,8 +929,8 @@ cnx.commit()
 # Global variables.
 # year = int(input('Enter the year search term: '))
 # page = int(input('Enter the start page: '))
-year = 2015  # '2016+B%2A'
-page = 62
+year = 2013  # '2016+B%2A'
+page = 24
 card_start = 1
 card_end = 100
 debugging = False
